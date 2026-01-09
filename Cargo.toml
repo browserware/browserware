@@ -16,6 +16,8 @@ edition = "2024"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/browserware/browserware"
+keywords = ["browser", "routing", "profile", "launcher"]
+categories = ["command-line-utilities", "development-tools"]
 authors = ["Aleksei Gurianov <gurianov@gmail.com>"]
 
 [workspace.lints.rust]
