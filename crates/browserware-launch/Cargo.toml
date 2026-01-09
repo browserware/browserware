@@ -1,0 +1,16 @@
+[package]
+name = "browserware-launch"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow = "1.0"
+browserware-types = { path = "../browserware-types" }
+url = "2.5"
+
+[lints]
+workspace = true

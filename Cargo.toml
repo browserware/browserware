@@ -1,0 +1,27 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/browserware-types",
+    "crates/browserware-detect",
+    "crates/browserware-profiles",
+    "crates/browserware-launch",
+    "crates/browserware-rules",
+    "crates/browserware-system",
+    "crates/browserware-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/browserware/browserware"
+authors = ["Aleksei Gurianov <gurianov@gmail.com>"]
+
+[workspace.lints.rust]
+missing_docs = "warn"
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+pedantic = "warn"
+nursery = "warn"
