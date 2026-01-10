@@ -67,7 +67,7 @@ enum ConfigAction {
     Check,
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() {
     let cli = Cli::parse();
 
     tracing_subscriber::fmt()
@@ -113,6 +113,4 @@ fn main() -> anyhow::Result<()> {
             println!("Unregister not yet implemented (Milestone 5)");
         }
     }
-
-    Ok(())
 }

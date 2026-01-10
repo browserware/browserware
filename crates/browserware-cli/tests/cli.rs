@@ -1,8 +1,11 @@
+#![allow(missing_docs)]
+
 use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 
 fn brw() -> Command {
-    Command::cargo_bin("brw").unwrap()
+    cargo_bin_cmd!("brw")
 }
 
 #[test]
