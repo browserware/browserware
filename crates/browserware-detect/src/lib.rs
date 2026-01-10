@@ -43,7 +43,7 @@
 //! |----------|--------|-------|
 //! | macOS    | Active | Uses Launch Services API |
 //! | Windows  | Stub   | Uses Registry API (not yet implemented) |
-//! | Linux    | Stub   | XDG desktop files (not yet implemented) |
+//! | Linux    | Active | XDG desktop file scanning |
 //! | Other    | Stub   | Returns empty results |
 
 // Allow unsafe code for platform FFI bindings
