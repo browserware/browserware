@@ -1,4 +1,18 @@
+# Build artifacts
 /target/
 **/*.rs.bk
-Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
+
+# Environment
+.env
+.env.local
+
+# Test artifacts
+*.log
+coverage/
