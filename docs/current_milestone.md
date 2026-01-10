@@ -95,15 +95,15 @@ crates/browserware-detect/
 - [ ] Unit tests for Windows
 - [ ] Manual testing on Windows (VM or CI)
 
-### Week 4: Linux Implementation
+### Week 4: Linux Implementation ✅
 
-- [ ] Implement XDG directory scanning
-- [ ] Implement `.desktop` file parsing
-- [ ] Implement `parse_exec_to_path()`
-- [ ] Handle Flatpak and Snap paths
-- [ ] Implement `detect_browsers()`
-- [ ] Implement `detect_default_browser()`
-- [ ] Unit tests for Linux
+- [x] Implement XDG directory scanning
+- [x] Implement `.desktop` file parsing
+- [x] Implement `parse_exec_to_path()`
+- [x] Handle Flatpak and Snap paths
+- [x] Implement `detect_browsers()`
+- [x] Implement `detect_default_browser()`
+- [x] Unit tests for Linux
 
 ### Week 5: CLI Integration & Polish (partial) ✅
 
@@ -126,9 +126,9 @@ crates/browserware-detect/
 
 ## Success Criteria
 
-1. 🟡 `brw browsers` returns accurate list on macOS, Windows, Linux (macOS ✅, Windows/Linux pending)
+1. 🟡 `brw browsers` returns accurate list on macOS, Windows, Linux (macOS ✅, Linux ✅, Windows pending)
 2. ✅ `brw browsers --format json` produces valid JSON
-3. 🟡 Default browser is correctly identified (macOS ✅, Windows/Linux pending)
+3. 🟡 Default browser is correctly identified (macOS ✅, Linux ✅, Windows pending)
 4. ✅ All detected browsers have valid executable paths
 5. ✅ Versions are extracted where possible
 6. 🟡 CI passes on all three platforms (needs verification)
@@ -156,7 +156,7 @@ crates/browserware-detect/
 - ✅ `crates/browserware-detect/src/platform/mod.rs`
 - ✅ `crates/browserware-detect/src/platform/macos.rs`
 - ✅ `crates/browserware-detect/src/platform/windows.rs` (stub)
-- ✅ `crates/browserware-detect/src/platform/linux.rs` (stub)
+- ✅ `crates/browserware-detect/src/platform/linux.rs`
 - [ ] `crates/browserware-detect/tests/integration.rs`
 
 **Modified Files**:
