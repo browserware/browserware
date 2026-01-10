@@ -1,9 +1,18 @@
-pub use browser::Browser;
-pub use browser_family::BrowserFamily;
-pub use channel::Channel;
-pub use profile::Profile;
+//! Shared types for the browserware ecosystem.
+//!
+//! This crate provides common types, traits, and error definitions
+//! used across all browserware crates.
+
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
 
 mod browser;
-mod browser_family;
-mod channel;
-mod profile;
+mod error;
+mod variant;
+
+pub use browser::{Browser, BrowserFamily, BrowserId};
+pub use error::{Error, Result};
+pub use variant::{BrowserVariant, ChromiumChannel, FirefoxChannel, WebKitChannel};
+
+// Re-export url for convenience
+pub use url::Url;

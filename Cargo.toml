@@ -27,3 +27,35 @@ unreachable_pub = "warn"
 [workspace.lints.clippy]
 pedantic = "warn"
 nursery = "warn"
+
+[workspace.dependencies]
+# Internal crates
+browserware-types = { path = "crates/browserware-types" }
+browserware-detect = { path = "crates/browserware-detect" }
+browserware-profiles = { path = "crates/browserware-profiles" }
+browserware-launch = { path = "crates/browserware-launch" }
+browserware-rules = { path = "crates/browserware-rules" }
+browserware-system = { path = "crates/browserware-system" }
+
+# Serialization
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+toml = "0.9.11"
+
+# Error handling
+thiserror = "2.0.17"
+anyhow = "1.0.100"
+
+# CLI
+clap = { version = "4.5.54", features = ["derive"] }
+
+# Logging
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
+
+# Utilities
+url = { version = "2.5.8", features = ["serde"] }
+
+# Testing
+assert_cmd = "2.1.2"
+predicates = "3.1.3"

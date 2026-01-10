@@ -1,18 +1,28 @@
 [package]
 name = "browserware-cli"
+description = "Smart browser routing CLI"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [[bin]]
 name = "brw"
 path = "src/main.rs"
 
 [dependencies]
-anyhow = "1.0"
+browserware-types = { workspace = true }
+clap = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
+
+[dev-dependencies]
+assert_cmd = { workspace = true }
+predicates = { workspace = true }
 
 [lints]
 workspace = true

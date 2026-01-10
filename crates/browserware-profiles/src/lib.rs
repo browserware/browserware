@@ -1,6 +1,10 @@
-use browserware_types::{BrowserFamily, Profile};
+//! Browser profile management for the browserware ecosystem.
+//!
+//! # Status
+//!
+//! This crate is under development. See the repository for progress.
 
-#[must_use]
-pub const fn find_profiles(_family: &BrowserFamily) -> Vec<Profile> {
-    vec![]
-}
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
+// TODO: Implement in Milestone 2
