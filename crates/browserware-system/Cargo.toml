@@ -1,14 +1,16 @@
 [package]
 name = "browserware-system"
+description = "System integration for the browserware ecosystem"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [dependencies]
-anyhow = "1.0"
+anyhow = { workspace = true }
 
 [lints]
 workspace = true

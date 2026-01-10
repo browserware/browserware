@@ -1,6 +1,10 @@
-use browserware_types::Browser;
+//! Browser detection for the browserware ecosystem.
+//!
+//! # Status
+//!
+//! This crate is under development. See the repository for progress.
 
-#[must_use]
-pub const fn detect_browsers() -> Vec<Browser> {
-    vec![]
-}
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
+// TODO: Implement in Milestone 1

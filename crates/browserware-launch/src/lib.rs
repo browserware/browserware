@@ -1,7 +1,10 @@
-use browserware_types::BrowserFamily;
-use std::path::Path;
-use url::Url;
+//! Browser launching for the browserware ecosystem.
+//!
+//! # Status
+//!
+//! This crate is under development. See the repository for progress.
 
-pub fn launch(_executable: &Path, _family: BrowserFamily, _urls: &[Url]) -> anyhow::Result<()> {
-    todo!()
-}
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
+// TODO: Implement in Milestone 3
