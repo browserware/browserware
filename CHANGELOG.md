@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-01-10
+
 ### Added
 
 - Initial workspace structure with 7 crates
@@ -16,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release workflow for multi-platform binaries
 - Security audit workflow
 - Dependabot configuration
+- Development task runner (`justfile`)
+- Contributing guidelines and architecture documentation
 
 ### Infrastructure
 
@@ -23,4 +27,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workspace-level lints (clippy pedantic + nursery)
 - cargo-deny for dependency security and license compliance
 
-[Unreleased]: https://github.com/browserware/browserware/commits/main
+[Unreleased]: https://github.com/browserware/browserware/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/browserware/browserware/releases/tag/v0.1.0
