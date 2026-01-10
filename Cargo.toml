@@ -30,12 +30,12 @@ nursery = "warn"
 
 [workspace.dependencies]
 # Internal crates
-browserware-types = { path = "crates/browserware-types" }
-browserware-detect = { path = "crates/browserware-detect" }
-browserware-profiles = { path = "crates/browserware-profiles" }
-browserware-launch = { path = "crates/browserware-launch" }
-browserware-rules = { path = "crates/browserware-rules" }
-browserware-system = { path = "crates/browserware-system" }
+browserware-types = { version = "0.1.0", path = "crates/browserware-types" }
+browserware-detect = { version = "0.1.0", path = "crates/browserware-detect" }
+browserware-profiles = { version = "0.1.0", path = "crates/browserware-profiles" }
+browserware-launch = { version = "0.1.0", path = "crates/browserware-launch" }
+browserware-rules = { version = "0.1.0", path = "crates/browserware-rules" }
+browserware-system = { version = "0.1.0", path = "crates/browserware-system" }
 
 # Serialization
 serde = { version = "1.0.228", features = ["derive"] }

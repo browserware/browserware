@@ -67,22 +67,23 @@ crates/browserware-detect/
 
 ## Task Breakdown by Week
 
-### Week 1: Foundation & Registry
+### Week 1: Foundation & Registry ✅
 
-- [ ] Create `src/registry.rs` with `BrowserMeta` struct and `KNOWN_BROWSERS`
-- [ ] Create `src/platform/mod.rs` with cfg routing
-- [ ] Create `src/lib.rs` with public API signatures
-- [ ] Add platform-specific dependencies to `Cargo.toml`
-- [ ] Add `tracing` instrumentation points
+- [x] Create `src/registry.rs` with `BrowserMeta` struct and `KNOWN_BROWSERS`
+- [x] Create `src/platform/mod.rs` with cfg routing
+- [x] Create `src/lib.rs` with public API signatures
+- [x] Add platform-specific dependencies to `Cargo.toml`
+- [x] Add `tracing` instrumentation points
 
-### Week 2: macOS Implementation
+### Week 2: macOS Implementation ✅
 
-- [ ] Implement `detect_by_bundle_id()` using Core Foundation
-- [ ] Implement `extract_version_from_plist()`
-- [ ] Implement `detect_browsers()`
-- [ ] Implement `detect_default_browser()`
-- [ ] Unit tests for macOS
-- [ ] Manual testing on macOS
+- [x] Implement `LSCopyAllHandlersForURLScheme()` FFI bindings
+- [x] Implement `extract_version_from_plist()`
+- [x] Implement `detect_browsers()` with discovery-first approach
+- [x] Implement `detect_default_browser()`
+- [x] Filter nested apps (helper apps inside Contents/Support/)
+- [x] Unit tests for macOS
+- [x] Manual testing on macOS
 
 ### Week 3: Windows Implementation
 
@@ -104,17 +105,17 @@ crates/browserware-detect/
 - [ ] Implement `detect_default_browser()`
 - [ ] Unit tests for Linux
 
-### Week 5: CLI Integration & Polish
+### Week 5: CLI Integration & Polish (partial) ✅
 
-- [ ] Update `browserware-cli` to use `browserware-detect`
-- [ ] Implement table/json/plain output formatting
-- [ ] Add default browser indicator
+- [x] Update `browserware-cli` to use `browserware-detect`
+- [x] Implement table/json/plain output formatting
+- [x] Add default browser indicator (`*` prefix)
 - [ ] CLI integration tests
 - [ ] Cross-platform CI verification
 
 ### Week 6: Documentation & Release Prep
 
-- [ ] Complete rustdoc for all public items
+- [x] Complete rustdoc for all public items
 - [ ] Add usage examples to crate docs
 - [ ] Update README with examples
 - [ ] Update CHANGELOG
@@ -125,14 +126,14 @@ crates/browserware-detect/
 
 ## Success Criteria
 
-1. ✅ `brw browsers` returns accurate list on macOS, Windows, Linux
+1. 🟡 `brw browsers` returns accurate list on macOS, Windows, Linux (macOS ✅, Windows/Linux pending)
 2. ✅ `brw browsers --format json` produces valid JSON
-3. ✅ Default browser is correctly identified
+3. 🟡 Default browser is correctly identified (macOS ✅, Windows/Linux pending)
 4. ✅ All detected browsers have valid executable paths
 5. ✅ Versions are extracted where possible
-6. ✅ CI passes on all three platforms
+6. 🟡 CI passes on all three platforms (needs verification)
 7. ✅ `cargo doc` builds without warnings
-8. ✅ No `unsafe` code (or minimal, well-documented FFI)
+8. ✅ Minimal, well-documented unsafe FFI for Launch Services
 
 ---
 
@@ -151,18 +152,18 @@ crates/browserware-detect/
 ## Files to Create/Modify
 
 **New Files**:
-- `crates/browserware-detect/src/registry.rs`
-- `crates/browserware-detect/src/platform/mod.rs`
-- `crates/browserware-detect/src/platform/macos.rs`
-- `crates/browserware-detect/src/platform/windows.rs`
-- `crates/browserware-detect/src/platform/linux.rs`
-- `crates/browserware-detect/tests/integration.rs`
+- ✅ `crates/browserware-detect/src/registry.rs`
+- ✅ `crates/browserware-detect/src/platform/mod.rs`
+- ✅ `crates/browserware-detect/src/platform/macos.rs`
+- ✅ `crates/browserware-detect/src/platform/windows.rs` (stub)
+- ✅ `crates/browserware-detect/src/platform/linux.rs` (stub)
+- [ ] `crates/browserware-detect/tests/integration.rs`
 
 **Modified Files**:
-- `crates/browserware-detect/Cargo.toml` (add dependencies)
-- `crates/browserware-detect/src/lib.rs` (implement API)
-- `crates/browserware-cli/Cargo.toml` (add browserware-detect)
-- `crates/browserware-cli/src/main.rs` (implement browsers command)
-- `crates/browserware-cli/tests/cli.rs` (add browsers tests)
-- `Cargo.toml` (add platform dependencies to workspace)
-- `CHANGELOG.md` (update for M1)
+- ✅ `crates/browserware-detect/Cargo.toml` (add dependencies)
+- ✅ `crates/browserware-detect/src/lib.rs` (implement API)
+- ✅ `crates/browserware-cli/Cargo.toml` (add browserware-detect)
+- ✅ `crates/browserware-cli/src/main.rs` (implement browsers command)
+- [ ] `crates/browserware-cli/tests/cli.rs` (add browsers tests)
+- [ ] `Cargo.toml` (add platform dependencies to workspace)
+- [ ] `CHANGELOG.md` (update for M1)

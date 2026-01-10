@@ -102,3 +102,70 @@ cargo build --release --locked --target ${{ matrix.target }}
 - Simple dependency-free recipes
 
 **Setup**: `cargo install just`, then `just setup`
+
+## Browser Detection
+
+### Discovery-First Detection Strategy
+
+**Decision**: Enumerate all registered URL handlers from the OS, then enrich with metadata from a known browser registry.
+
+**Alternatives Considered**:
+1. **Registry-first**: Check only browsers in our known registry - misses new/unknown browsers
+2. **Discovery-first** (chosen): Enumerate all, enrich known ones
+
+**Reason**: Users may have browsers we don't know about (forks, regional browsers, new releases). A registry-only approach would silently miss them. Discovery-first ensures we never miss a browser, while still providing rich metadata for known ones.
+
+**Implementation**:
+```rust
+// 1. Enumerate ALL browsers from OS
+let all_handlers = platform::enumerate_url_handlers("https");
+
+// 2. For each, enrich with known metadata or derive
+for bundle_id in all_handlers {
+    match registry::find_by_bundle_id(&bundle_id) {
+        Some(meta) => Browser::from_meta(meta, ...),  // Known browser
+        None => Browser::unknown(bundle_id, ...),     // Unknown browser
+    }
+}
+```
+
+**Unknown browsers get**:
+- ID: bundle ID used directly (e.g., `com.example.browser`)
+- Name: from app metadata (`CFBundleName`, desktop `Name=`)
+- Variant: `BrowserVariant::Single(BrowserFamily::Other)`
+
+### Registry Data Quality
+
+**Decision**: All browser entries in `KNOWN_BROWSERS` must have verifiable platform identifiers.
+
+**Reason**: Bundle IDs, registry keys, and desktop IDs must be sourced from actual installations or official documentation. Unverified or placeholder data can cause incorrect browser matching.
+
+### Platform-Specific Detection APIs
+
+**macOS**:
+- `LSCopyAllHandlersForURLScheme("https")` - enumerate all browsers
+- `LSCopyDefaultHandlerForURLScheme("https")` - get default browser
+- `LSCopyApplicationURLsForBundleIdentifier()` - get app path from bundle ID
+- `CFBundleCopyInfoDictionaryForURL()` - read Info.plist for version
+
+**Windows**:
+- `HKLM\SOFTWARE\Clients\StartMenuInternet` - enumerate all browsers
+- `HKCU\...\UrlAssociations\http\UserChoice\ProgId` - get default browser
+
+**Linux**:
+- Scan XDG directories for `.desktop` files with `MimeType=x-scheme-handler/http`
+- `xdg-settings get default-web-browser` - get default browser
+
+### Platform Dependencies
+
+**Decision**: Use lightweight, focused crates for platform APIs.
+
+| Platform | Crate | Version | Purpose |
+|----------|-------|---------|---------|
+| macOS | `core-foundation` | 0.10.x | Core Foundation types and bindings |
+| macOS | `plist` | 1.x | Parse Info.plist files |
+| Windows | `windows-registry` | 0.6.x | Registry access (part of windows-rs) |
+| Linux | `xdg` | 3.x | XDG Base Directory spec |
+| Linux | `home` | 0.5.x | Home directory detection |
+
+**Reason**: These crates are well-maintained, focused on their specific tasks, and avoid pulling in large framework dependencies. For home directory detection we use the `home` crate (maintained by rust-lang) instead of the deprecated `dirs::home_dir()` function.
