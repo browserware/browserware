@@ -466,8 +466,8 @@ fn get_desktop_dirs(xdg: &Option<BaseDirectories>) -> Vec<PathBuf> {
     }
     
     // Flatpak
-    if let Some(home) = dirs::home_dir() {
-        dirs.push(home.join(".local/share/flatpak/exports/share/applications"));
+    if let Some(home_dir) = home::home_dir() {
+        dirs.push(home_dir.join(".local/share/flatpak/exports/share/applications"));
     }
     
     // Snap
@@ -850,8 +850,8 @@ windows = { version = "0.58", features = [
 ] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-xdg = "2.5"
-dirs = "5"
+xdg = "3"
+home = "0.5"
 
 [dev-dependencies]
 tempfile = { workspace = true }

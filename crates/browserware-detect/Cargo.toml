@@ -11,6 +11,18 @@ categories.workspace = true
 
 [dependencies]
 browserware-types = { workspace = true }
+tracing = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.10"
+plist = "1.7"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-registry = "0.6"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+xdg = "3"
+home = "0.5"
 
 [lints]
 workspace = true

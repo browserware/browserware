@@ -14,8 +14,11 @@ name = "brw"
 path = "src/main.rs"
 
 [dependencies]
+browserware-detect = { workspace = true }
 browserware-types = { workspace = true }
 clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 anyhow = { workspace = true }
