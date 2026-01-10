@@ -16,3 +16,9 @@
 # Test artifacts
 *.log
 coverage/
+
+# Generated symlinks (created by 'just setup')
+CLAUDE.md
+GEMINI.md
+CURSOR.md
+COPILOT.md
