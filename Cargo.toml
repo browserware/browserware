@@ -43,7 +43,7 @@ serde_json = "1.0.149"
 toml = "0.9.11"
 
 # Error handling
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 anyhow = "1.0.100"
 
 # CLI
