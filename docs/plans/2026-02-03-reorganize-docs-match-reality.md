@@ -48,8 +48,8 @@ Move milestone planning docs into docs/plans/ structure and update all content t
 **Files:**
 - Modify: `CHANGELOG.md`
 
-- [ ] Add macOS browser detection entries under [Unreleased] section
-- [ ] Include: browserware-detect crate with macOS Launch Services integration, browser registry, CLI browsers command with output formats
+- [x] Add macOS browser detection entries under [Unreleased] section
+- [x] Include: browserware-detect crate with macOS Launch Services integration, browser registry, CLI browsers command with output formats
 
 ### Task 4: Remove old milestone docs
 
