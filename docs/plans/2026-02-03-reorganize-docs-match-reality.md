@@ -57,8 +57,8 @@ Move milestone planning docs into docs/plans/ structure and update all content t
 - Delete: `docs/current_milestone.md`
 - Delete: `docs/current_milestone_details.md`
 
-- [ ] Delete `docs/current_milestone.md` (content migrated to docs/plans/)
-- [ ] Delete `docs/current_milestone_details.md` (content merged and corrected)
+- [x] Delete `docs/current_milestone.md` (content migrated to docs/plans/)
+- [x] Delete `docs/current_milestone_details.md` (content merged and corrected)
 
 ## Verification
 
