@@ -39,9 +39,9 @@ Move milestone planning docs into docs/plans/ structure and update all content t
 **Files:**
 - Modify: `docs/architecture.md`
 
-- [ ] Update `browserware-detect` status from "Scaffold" to "macOS active, Windows/Linux stub"
-- [ ] Update `browserware-cli` status from "Scaffold" to "Active (browsers command)"
-- [ ] Update `browserware-types` status from "In progress" to "Active"
+- [x] Update `browserware-detect` status from "Scaffold" to "macOS active, Windows/Linux stub"
+- [x] Update `browserware-cli` status from "Scaffold" to "Active (browsers command)"
+- [x] Update `browserware-types` status from "In progress" to "Active"
 
 ### Task 3: Update CHANGELOG.md with macOS detection work
 

@@ -25,13 +25,13 @@ For comprehensive architecture documentation, see [AGENTS.md](../AGENTS.md).
 
 | Crate | Question It Answers | Status |
 |-------|---------------------|--------|
-| `browserware-types` | Shared types (`Browser`, `Profile`, etc.) | In progress |
-| `browserware-detect` | "What browsers are installed?" | Scaffold |
+| `browserware-types` | Shared types (`Browser`, `Profile`, etc.) | Active |
+| `browserware-detect` | "What browsers are installed?" | macOS active, Windows/Linux stub |
 | `browserware-profiles` | "What profiles exist for a browser?" | Scaffold |
 | `browserware-launch` | "Run this browser with these options" | Scaffold |
 | `browserware-rules` | "Which browser/profile for this URL?" | Scaffold |
 | `browserware-system` | "OS integration (default browser, etc.)" | Scaffold |
-| `browserware-cli` | User-facing CLI (`brw` binary) | Scaffold |
+| `browserware-cli` | User-facing CLI (`brw` binary) | Active (browsers command) |
 
 ## Data Flow
 
