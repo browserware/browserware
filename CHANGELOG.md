@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `browserware-detect` crate with macOS browser detection via Launch Services
   - Discovery-first approach: enumerates all HTTPS URL handlers, then enriches with known metadata
   - `detect_browsers()`, `detect_browser()`, `detect_default_browser()`, `detect_browsers_by_family()` public API
-  - Known browser registry (35 entries across Chromium, Firefox, and WebKit families)
+  - Known browser registry (30 entries across Chromium, Firefox, and WebKit families)
   - Info.plist parsing for version and display name extraction
   - Unknown browser derivation from bundle ID for browsers not in registry
   - Nested app filtering to prevent duplicate helper app entries

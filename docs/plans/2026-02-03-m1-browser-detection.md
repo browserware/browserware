@@ -10,7 +10,7 @@
 ### Completed
 
 - **browserware-types**: Core types (`Browser`, `BrowserVariant`, `BrowserFamily`, `BrowserId`) with serde support, builder pattern, and comprehensive tests
-- **browserware-detect registry**: 38 known browser entries covering Chromium (11), Firefox (7), and WebKit (3) families with all platform identifiers
+- **browserware-detect registry**: 30 known browser entries covering Chromium (19), Firefox (8), and WebKit (3) families with all platform identifiers
 - **macOS detection**: Full implementation using Launch Services discovery-first approach (see [ADR: Discovery-First Detection](../decisions.md#discovery-first-detection-strategy))
 - **Detection public API**: `detect_browsers()`, `detect_browser()`, `detect_default_browser()`, `detect_browsers_by_family()` with tracing instrumentation
 - **CLI browsers command**: `brw browsers` with `--format table|json|plain`, `--family` filter, default browser `*` indicator
@@ -38,7 +38,7 @@ crates/browserware-detect/
 ├── Cargo.toml
 ├── src/
 │   ├── lib.rs              # Public API, re-exports
-│   ├── registry.rs         # Known browser registry (38 entries)
+│   ├── registry.rs         # Known browser registry (30 entries)
 │   ├── platform/
 │   │   ├── mod.rs          # Platform detection, cfg routing
 │   │   ├── macos.rs        # macOS: Launch Services (implemented)
@@ -94,7 +94,7 @@ Unknown browsers receive:
 
 ### Task 1: Foundation & Registry [done]
 
-- [x] `BrowserMeta` struct and `KNOWN_BROWSERS` array (38 entries)
+- [x] `BrowserMeta` struct and `KNOWN_BROWSERS` array (30 entries)
 - [x] Lookup functions: `find_by_id()`, `find_by_bundle_id()`, `find_by_registry_key()`, `find_by_desktop_id()`
 - [x] Platform cfg routing in `platform/mod.rs`
 - [x] Public API signatures in `lib.rs`

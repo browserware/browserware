@@ -62,9 +62,9 @@ Move milestone planning docs into docs/plans/ structure and update all content t
 
 ## Verification
 
-- [ ] Verify no broken cross-references in remaining docs
-- [ ] Run `cargo doc --workspace --no-deps` to confirm docs still build
-- [ ] Check that all status claims in the new plan match actual source code
+- [x] Verify no broken cross-references in remaining docs
+- [x] Run `cargo doc --workspace --no-deps` to confirm docs still build
+- [x] Check that all status claims in the new plan match actual source code
 
 ## Wrap-up
 
