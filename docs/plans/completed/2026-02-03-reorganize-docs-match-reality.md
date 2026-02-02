@@ -68,4 +68,4 @@ Move milestone planning docs into docs/plans/ structure and update all content t
 
 ## Wrap-up
 
-- [ ] Move this plan to `docs/plans/completed/` when done
+- [x] Move this plan to `docs/plans/completed/` when done
