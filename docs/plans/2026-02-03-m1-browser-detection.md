@@ -143,12 +143,12 @@ Unknown browsers receive:
 - [x] CLI integration tests
 - [x] Cross-platform CI verification
 
-### Task 6: Documentation & Release Prep [partial]
+### Task 6: Documentation & Release Prep [done]
 
 - [x] Rustdoc for all public items
-- [ ] Usage examples in crate docs
-- [ ] Update CHANGELOG for M1
-- [ ] Performance testing (detection target: <100ms)
+- [x] Usage examples in crate docs
+- [x] Update CHANGELOG for M1
+- [x] Performance testing (detection target: <100ms)
 
 ---
 

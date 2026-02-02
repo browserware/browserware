@@ -14,10 +14,12 @@
 //! provide consistent metadata (IDs, display names, engine families).
 //! Unknown browsers are still detected with derived metadata.
 //!
-//! # Example
+//! # Examples
+//!
+//! ## Basic Detection
 //!
 //! ```no_run
-//! use browserware_detect::{detect_browsers, detect_default_browser, BrowserFamily};
+//! use browserware_detect::{detect_browsers, detect_default_browser};
 //!
 //! // List all installed browsers
 //! for browser in detect_browsers() {
@@ -25,16 +27,69 @@
 //!     if let Some(version) = &browser.version {
 //!         println!("  Version: {version}");
 //!     }
+//!     println!("  Path: {}", browser.executable.display());
 //! }
 //!
 //! // Get the default browser
 //! if let Some(default) = detect_default_browser() {
-//!     println!("Default browser: {}", default.name);
+//!     println!("Default browser: {} ({})", default.name, default.id);
+//! }
+//! ```
+//!
+//! ## Finding Specific Browsers
+//!
+//! ```no_run
+//! use browserware_detect::detect_browser;
+//!
+//! // Check if Chrome is installed
+//! if let Some(chrome) = detect_browser("chrome") {
+//!     println!("Chrome found at: {}", chrome.executable.display());
+//! } else {
+//!     println!("Chrome not installed");
 //! }
 //!
-//! // Filter by browser family
-//! let chromium_browsers = browserware_detect::detect_browsers_by_family(BrowserFamily::Chromium);
-//! println!("Found {} Chromium-based browsers", chromium_browsers.len());
+//! // Check for a specific Firefox variant
+//! if let Some(nightly) = detect_browser("firefox-nightly") {
+//!     println!("Firefox Nightly version: {:?}", nightly.version);
+//! }
+//! ```
+//!
+//! ## Filtering by Browser Family
+//!
+//! ```no_run
+//! use browserware_detect::{detect_browsers_by_family, BrowserFamily};
+//!
+//! // Find all Chromium-based browsers
+//! let chromium = detect_browsers_by_family(BrowserFamily::Chromium);
+//! println!("Found {} Chromium browsers:", chromium.len());
+//! for browser in chromium {
+//!     println!("  - {} ({})", browser.name, browser.id);
+//! }
+//!
+//! // Find all Firefox-based browsers
+//! let firefox = detect_browsers_by_family(BrowserFamily::Firefox);
+//! println!("Firefox variants: {}", firefox.len());
+//!
+//! // Check for WebKit browsers (Safari, etc.)
+//! let webkit = detect_browsers_by_family(BrowserFamily::WebKit);
+//! if webkit.is_empty() {
+//!     println!("No WebKit browsers installed");
+//! }
+//! ```
+//!
+//! ## Working with Unknown Browsers
+//!
+//! ```no_run
+//! use browserware_detect::{detect_browsers, BrowserFamily};
+//!
+//! // The detection system will find browsers not in the known registry
+//! for browser in detect_browsers() {
+//!     if browser.family() == BrowserFamily::Other {
+//!         println!("Unknown browser: {} at {}",
+//!                  browser.name,
+//!                  browser.executable.display());
+//!     }
+//! }
 //! ```
 //!
 //! # Platform Support
