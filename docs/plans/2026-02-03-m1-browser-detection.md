@@ -134,14 +134,14 @@ Unknown browsers receive:
 - [x] `detect_default_browser()` via `xdg-settings get default-web-browser`
 - [x] Unit tests for Linux
 
-### Task 5: CLI Integration [partial]
+### Task 5: CLI Integration [done]
 
 - [x] `brw browsers` command with `browserware-detect` integration
 - [x] Table/JSON/plain output formatting
 - [x] Default browser indicator (`*` prefix)
 - [x] `--family` filter flag
-- [ ] CLI integration tests
-- [ ] Cross-platform CI verification
+- [x] CLI integration tests
+- [x] Cross-platform CI verification
 
 ### Task 6: Documentation & Release Prep [partial]
 
