@@ -123,16 +123,16 @@ Unknown browsers receive:
 - [x] Unit tests for Windows
 - [ ] Manual testing on Windows (VM or CI)
 
-### Task 4: Linux Implementation [remaining]
+### Task 4: Linux Implementation [done]
 
-- [ ] Scan XDG directories for `.desktop` files
-- [ ] Parse `.desktop` file format (Name, Exec, MimeType)
-- [ ] Filter for `x-scheme-handler/http` MimeType
-- [ ] Handle Flatpak and Snap application paths
-- [ ] `parse_exec_to_path()` - extract executable from Exec= field
-- [ ] `detect_browsers()` implementation
-- [ ] `detect_default_browser()` via `xdg-settings get default-web-browser`
-- [ ] Unit tests for Linux
+- [x] Scan XDG directories for `.desktop` files
+- [x] Parse `.desktop` file format (Name, Exec, MimeType)
+- [x] Filter for `x-scheme-handler/http` MimeType
+- [x] Handle Flatpak and Snap application paths
+- [x] `parse_exec_to_path()` - extract executable from Exec= field
+- [x] `detect_browsers()` implementation
+- [x] `detect_default_browser()` via `xdg-settings get default-web-browser`
+- [x] Unit tests for Linux
 
 ### Task 5: CLI Integration [partial]
 
