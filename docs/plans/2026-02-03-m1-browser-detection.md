@@ -121,7 +121,7 @@ Unknown browsers receive:
 - [x] `detect_browsers()` implementation
 - [x] `detect_default_browser()` via `HKCU\...\UrlAssociations\http\UserChoice\ProgId`
 - [x] Unit tests for Windows
-- [ ] Manual testing on Windows (VM or CI)
+- [x] Manual testing on Windows (VM or CI)
 
 ### Task 4: Linux Implementation [done]
 
