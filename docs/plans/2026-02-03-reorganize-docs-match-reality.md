@@ -27,12 +27,12 @@ Move milestone planning docs into docs/plans/ structure and update all content t
 **Files:**
 - Create: `docs/plans/2026-02-03-m1-browser-detection.md`
 
-- [ ] Write consolidated M1 plan that combines useful content from `current_milestone.md` and `current_milestone_details.md`
-- [ ] Accurately mark completed items: types crate, registry, macOS detection (discovery-first approach), CLI browsers command with table/json/plain output, default browser indicator, rustdoc
-- [ ] Accurately mark remaining items: Windows detection, Linux detection, integration tests, CLI tests, usage examples, CHANGELOG update, performance testing, cross-platform CI
-- [ ] Remove stale "Week 3-8" timeline references (use task ordering instead)
-- [ ] Fix code snippets: remove registry-first detection code from details, align with discovery-first approach from decisions.md
-- [ ] Include risk mitigation table and success criteria (updated status)
+- [x] Write consolidated M1 plan that combines useful content from `current_milestone.md` and `current_milestone_details.md`
+- [x] Accurately mark completed items: types crate, registry, macOS detection (discovery-first approach), CLI browsers command with table/json/plain output, default browser indicator, rustdoc
+- [x] Accurately mark remaining items: Windows detection, Linux detection, integration tests, CLI tests, usage examples, CHANGELOG update, performance testing, cross-platform CI
+- [x] Remove stale "Week 3-8" timeline references (use task ordering instead)
+- [x] Fix code snippets: remove registry-first detection code from details, align with discovery-first approach from decisions.md
+- [x] Include risk mitigation table and success criteria (updated status)
 
 ### Task 2: Update docs/architecture.md crate status table
 
