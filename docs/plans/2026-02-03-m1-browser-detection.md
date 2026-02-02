@@ -112,15 +112,15 @@ Unknown browsers receive:
 - [x] Unknown browser derivation from bundle ID
 - [x] Unit tests for macOS
 
-### Task 3: Windows Implementation [remaining]
+### Task 3: Windows Implementation [done]
 
-- [ ] Enumerate `HKLM\SOFTWARE\Clients\StartMenuInternet` subkeys
-- [ ] Read `shell\open\command` for executable paths
-- [ ] Parse executable path from command strings
-- [ ] Version extraction from PE file info
-- [ ] `detect_browsers()` implementation
-- [ ] `detect_default_browser()` via `HKCU\...\UrlAssociations\http\UserChoice\ProgId`
-- [ ] Unit tests for Windows
+- [x] Enumerate `HKLM\SOFTWARE\Clients\StartMenuInternet` subkeys
+- [x] Read `shell\open\command` for executable paths
+- [x] Parse executable path from command strings
+- [x] Version extraction from PE file info
+- [x] `detect_browsers()` implementation
+- [x] `detect_default_browser()` via `HKCU\...\UrlAssociations\http\UserChoice\ProgId`
+- [x] Unit tests for Windows
 - [ ] Manual testing on Windows (VM or CI)
 
 ### Task 4: Linux Implementation [remaining]
