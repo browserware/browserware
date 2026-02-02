@@ -26,7 +26,7 @@ For comprehensive architecture documentation, see [AGENTS.md](../AGENTS.md).
 | Crate | Question It Answers | Status |
 |-------|---------------------|--------|
 | `browserware-types` | Shared types (`Browser`, `Profile`, etc.) | Active |
-| `browserware-detect` | "What browsers are installed?" | macOS active, Windows/Linux stub |
+| `browserware-detect` | "What browsers are installed?" | Active (macOS, Windows, Linux) |
 | `browserware-profiles` | "What profiles exist for a browser?" | Scaffold |
 | `browserware-launch` | "Run this browser with these options" | Scaffold |
 | `browserware-rules` | "Which browser/profile for this URL?" | Scaffold |

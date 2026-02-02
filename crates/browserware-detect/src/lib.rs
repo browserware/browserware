@@ -97,8 +97,8 @@
 //! | Platform | Status | Notes |
 //! |----------|--------|-------|
 //! | macOS    | Active | Uses Launch Services API |
-//! | Windows  | Stub   | Uses Registry API (not yet implemented) |
-//! | Linux    | Stub   | XDG desktop files (not yet implemented) |
+//! | Windows  | Active | Uses Registry enumeration |
+//! | Linux    | Active | Uses XDG desktop files and xdg-settings |
 //! | Other    | Stub   | Returns empty results |
 
 // Allow unsafe code for platform FFI bindings

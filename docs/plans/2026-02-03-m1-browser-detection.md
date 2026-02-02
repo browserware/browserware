@@ -16,16 +16,20 @@
 - **CLI browsers command**: `brw browsers` with `--format table|json|plain`, `--family` filter, default browser `*` indicator
 - **Rustdoc**: All public items documented with examples
 
-### In Progress / Remaining
+### Completed
 
-- Windows detection (registry enumeration)
-- Linux detection (XDG desktop file scanning)
-- Integration tests for browserware-detect
-- CLI integration tests
-- Usage examples in crate-level docs
-- CHANGELOG update for M1
-- Performance testing (detection target: <100ms)
-- Cross-platform CI verification
+- ✅ Windows detection (registry enumeration)
+- ✅ Linux detection (XDG desktop file scanning)
+- ✅ CLI integration tests
+- ✅ Usage examples in crate-level docs
+- ✅ CHANGELOG update for M1
+- ✅ Performance testing (detection target: <100ms)
+
+### Remaining
+
+- ⏳ Integration tests for browserware-detect (unit tests exist, integration tests pending)
+- ⏳ Cross-platform CI verification
+- ⏳ Windows PE version extraction (currently stubbed)
 
 ---
 
@@ -42,8 +46,8 @@ crates/browserware-detect/
 │   ├── platform/
 │   │   ├── mod.rs          # Platform detection, cfg routing
 │   │   ├── macos.rs        # macOS: Launch Services (implemented)
-│   │   ├── windows.rs      # Windows: Registry (stub)
-│   │   └── linux.rs        # Linux: XDG desktop files (stub)
+│   │   ├── windows.rs      # Windows: Registry (implemented)
+│   │   └── linux.rs        # Linux: XDG desktop files (implemented)
 └── tests/
     └── (integration tests TBD)
 ```
@@ -156,14 +160,14 @@ Unknown browsers receive:
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| 1 | `brw browsers` returns accurate list on macOS, Windows, Linux | macOS done, Windows/Linux pending |
-| 2 | `brw browsers --format json` produces valid JSON | Done |
-| 3 | Default browser correctly identified per platform | macOS done, Windows/Linux pending |
-| 4 | All detected browsers have valid executable paths | Done |
-| 5 | Versions extracted where possible | Done |
-| 6 | CI passes on all three platforms | Needs verification |
-| 7 | `cargo doc` builds without warnings | Done |
-| 8 | Minimal, well-documented unsafe FFI for Launch Services | Done |
+| 1 | `brw browsers` returns accurate list on macOS, Windows, Linux | ✅ Done |
+| 2 | `brw browsers --format json` produces valid JSON | ✅ Done |
+| 3 | Default browser correctly identified per platform | ✅ Done |
+| 4 | All detected browsers have valid executable paths | ✅ Done |
+| 5 | Versions extracted where possible | ⚠️ Partial (Windows PE extraction pending) |
+| 6 | CI passes on all three platforms | ⏳ Needs verification |
+| 7 | `cargo doc` builds without warnings | ✅ Done |
+| 8 | Minimal, well-documented unsafe FFI for Launch Services | ✅ Done |
 
 ---
 
@@ -186,8 +190,8 @@ Unknown browsers receive:
 - `crates/browserware-detect/src/registry.rs` - done
 - `crates/browserware-detect/src/platform/mod.rs` - done
 - `crates/browserware-detect/src/platform/macos.rs` - done
-- `crates/browserware-detect/src/platform/windows.rs` - stub
-- `crates/browserware-detect/src/platform/linux.rs` - stub
+- `crates/browserware-detect/src/platform/windows.rs` - done (version extraction pending)
+- `crates/browserware-detect/src/platform/linux.rs` - done
 
 ### Modified (this milestone)
 
@@ -195,9 +199,11 @@ Unknown browsers receive:
 - `crates/browserware-detect/src/lib.rs` - done
 - `crates/browserware-cli/Cargo.toml` - done
 - `crates/browserware-cli/src/main.rs` - done
+- `crates/browserware-cli/tests/cli.rs` - done
+- `crates/browserware-detect/tests/performance.rs` - done (added)
+- `CHANGELOG.md` - done
 
 ### Remaining
 
 - `crates/browserware-detect/tests/integration.rs` - not started
-- `crates/browserware-cli/tests/cli.rs` - needs browser command tests
-- `CHANGELOG.md` - needs M1 entries
+- Windows PE version extraction in `windows.rs:221` - stubbed
