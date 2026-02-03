@@ -163,14 +163,27 @@ fn parse_command_to_executable(command: &str) -> Option<PathBuf> {
             let path = &command[1..end_quote + 1];
             return Some(PathBuf::from(path));
         }
+        // Malformed quoted string - no closing quote found
+        return None;
     }
 
-    // Otherwise, take everything up to the first space or argument flag
-    let path = command
-        .split_whitespace()
-        .next()
-        .unwrap_or(command);
+    // For unquoted paths, try to find the .exe file by incrementally checking path existence
+    // This handles paths like "C:\Program Files\Mozilla Firefox\firefox.exe -osint -url %1"
+    let parts: Vec<&str> = command.split_whitespace().collect();
 
+    // Try progressively longer paths until we find one that exists and ends with .exe
+    for i in 1..=parts.len() {
+        let potential_path = parts[..i].join(" ");
+        if potential_path.to_lowercase().ends_with(".exe") {
+            let path = PathBuf::from(&potential_path);
+            if path.exists() {
+                return Some(path);
+            }
+        }
+    }
+
+    // Fallback: take everything up to the first space
+    let path = parts.first().unwrap_or(&command);
     Some(PathBuf::from(path))
 }
 

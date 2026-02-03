@@ -250,14 +250,29 @@ fn print_browsers_table(browsers: &[Browser], default_id: Option<&str>) {
 /// Print browsers in JSON format
 fn print_browsers_json(browsers: &[Browser], default_id: Option<&str>) {
     #[derive(serde::Serialize)]
+    struct BrowserWithDefault<'a> {
+        #[serde(flatten)]
+        browser: &'a Browser,
+        is_default: bool,
+    }
+
+    #[derive(serde::Serialize)]
     struct BrowserOutput<'a> {
-        browsers: &'a [Browser],
+        browsers: Vec<BrowserWithDefault<'a>>,
         default: Option<&'a str>,
         count: usize,
     }
 
+    let browsers_with_default: Vec<BrowserWithDefault> = browsers
+        .iter()
+        .map(|browser| BrowserWithDefault {
+            browser,
+            is_default: default_id == Some(browser.id.0.as_str()),
+        })
+        .collect();
+
     let output = BrowserOutput {
-        browsers,
+        browsers: browsers_with_default,
         default: default_id,
         count: browsers.len(),
     };
