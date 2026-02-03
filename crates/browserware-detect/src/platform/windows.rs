@@ -8,7 +8,7 @@
 //! 3. Check `HKCU\...\UrlAssociations\http\UserChoice\ProgId` for default
 
 use std::path::{Path, PathBuf};
-use windows_registry::{Key, CURRENT_USER, LOCAL_MACHINE};
+use windows_registry::{CURRENT_USER, Key, LOCAL_MACHINE};
 
 use browserware_types::{Browser, BrowserFamily, BrowserVariant};
 
@@ -79,7 +79,9 @@ pub fn detect_default_browser() -> Option<Browser> {
     tracing::debug!(registry_key = %registry_key, "Mapped to registry key");
 
     // Get executable path
-    let key = LOCAL_MACHINE.open(r"SOFTWARE\Clients\StartMenuInternet").ok()?;
+    let key = LOCAL_MACHINE
+        .open(r"SOFTWARE\Clients\StartMenuInternet")
+        .ok()?;
     let executable = get_browser_executable(&key, &registry_key)?;
 
     // Build browser
@@ -264,7 +266,9 @@ mod tests {
         let executable = parse_command_to_executable(command);
         assert_eq!(
             executable,
-            Some(PathBuf::from(r"C:\Program Files\Google\Chrome\Application\chrome.exe"))
+            Some(PathBuf::from(
+                r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+            ))
         );
     }
 
@@ -274,7 +278,9 @@ mod tests {
         let executable = parse_command_to_executable(command);
         assert_eq!(
             executable,
-            Some(PathBuf::from(r"C:\Program Files\Mozilla Firefox\firefox.exe"))
+            Some(PathBuf::from(
+                r"C:\Program Files\Mozilla Firefox\firefox.exe"
+            ))
         );
     }
 

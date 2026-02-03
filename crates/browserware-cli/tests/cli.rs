@@ -33,15 +33,21 @@ fn browsers_subcommand_exists() {
 
 #[test]
 fn browsers_table_format() {
-    brw()
+    let output = brw()
         .args(["browsers", "--format", "table"])
         .assert()
-        .success()
-        .stdout(predicate::str::contains("ID"))
-        .stdout(predicate::str::contains("NAME"))
-        .stdout(predicate::str::contains("FAMILY"))
-        .stdout(predicate::str::contains("VERSION"))
-        .stdout(predicate::str::contains("browser(s) detected"));
+        .success();
+
+    // Check that output is valid - either headers + summary if browsers exist,
+    // or "No browsers detected." if none exist
+    output.stdout(
+        predicate::str::contains("ID")
+            .and(predicate::str::contains("NAME"))
+            .and(predicate::str::contains("FAMILY"))
+            .and(predicate::str::contains("VERSION"))
+            .and(predicate::str::contains("browser(s) detected"))
+            .or(predicate::str::contains("No browsers detected.")),
+    );
 }
 
 #[test]
@@ -121,7 +127,9 @@ fn browsers_family_filter_invalid() {
         .assert()
         .failure()
         .stderr(predicate::str::contains("Unknown browser family"))
-        .stderr(predicate::str::contains("Valid families: chromium, firefox, webkit, other"));
+        .stderr(predicate::str::contains(
+            "Valid families: chromium, firefox, webkit, other",
+        ));
 }
 
 #[test]
