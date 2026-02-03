@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Windows Detection** (via Registry)
   - Enumeration of `HKLM\SOFTWARE\Clients\StartMenuInternet` subkeys
   - Command string parsing to extract executable paths
-  - PE file version info extraction
+  - PE file version info extraction (stubbed, pending implementation)
   - Default browser detection via `HKCU\...\UrlAssociations\http\UserChoice\ProgId`
 
 - **Linux Detection** (via XDG Desktop Files)

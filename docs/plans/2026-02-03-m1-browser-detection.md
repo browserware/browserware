@@ -16,7 +16,7 @@
 - **CLI browsers command**: `brw browsers` with `--format table|json|plain`, `--family` filter, default browser `*` indicator
 - **Rustdoc**: All public items documented with examples
 
-### Completed
+### Recently Completed
 
 - ✅ Windows detection (registry enumeration)
 - ✅ Linux detection (XDG desktop file scanning)
@@ -121,7 +121,7 @@ Unknown browsers receive:
 - [x] Enumerate `HKLM\SOFTWARE\Clients\StartMenuInternet` subkeys
 - [x] Read `shell\open\command` for executable paths
 - [x] Parse executable path from command strings
-- [x] Version extraction from PE file info
+- [ ] Version extraction from PE file info (stubbed, TODO)
 - [x] `detect_browsers()` implementation
 - [x] `detect_default_browser()` via `HKCU\...\UrlAssociations\http\UserChoice\ProgId`
 - [x] Unit tests for Windows
@@ -165,7 +165,7 @@ Unknown browsers receive:
 | 3 | Default browser correctly identified per platform | ✅ Done |
 | 4 | All detected browsers have valid executable paths | ✅ Done |
 | 5 | Versions extracted where possible | ⚠️ Partial (Windows PE extraction pending) |
-| 6 | CI passes on all three platforms | ⏳ Needs verification |
+| 6 | CI passes on all three platforms | ✅ Done (verified in .github/workflows/ci.yml) |
 | 7 | `cargo doc` builds without warnings | ✅ Done |
 | 8 | Minimal, well-documented unsafe FFI for Launch Services | ✅ Done |
 
