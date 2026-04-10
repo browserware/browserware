@@ -7,6 +7,7 @@
 //!    b. Match against `KNOWN_BROWSERS` or derive metadata
 //! 3. Check `HKCU\...\UrlAssociations\http\UserChoice\ProgId` for default
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use windows_registry::{CURRENT_USER, Key, LOCAL_MACHINE};
 
@@ -23,18 +24,7 @@ pub fn detect_browsers() -> Vec<Browser> {
     tracing::debug!("Starting Windows browser detection");
 
     let mut browsers = Vec::new();
-
-    // Open the StartMenuInternet registry key
-    let Ok(key) = LOCAL_MACHINE.open(r"SOFTWARE\Clients\StartMenuInternet") else {
-        tracing::warn!("Failed to open StartMenuInternet registry key");
-        return browsers;
-    };
-
-    // Enumerate subkeys (each represents a registered browser)
-    let Ok(subkey_names) = key.keys() else {
-        tracing::warn!("Failed to enumerate StartMenuInternet subkeys");
-        return browsers;
-    };
+    let subkey_names = collect_start_menu_internet_subkeys();
 
     tracing::debug!(count = subkey_names.len(), "Found browser registry entries");
 
@@ -42,7 +32,7 @@ pub fn detect_browsers() -> Vec<Browser> {
         tracing::trace!(registry_key = %subkey_name, "Processing browser entry");
 
         // Get executable path from shell\open\command
-        let Some(executable) = get_browser_executable(&key, &subkey_name) else {
+        let Some(executable) = get_browser_executable(&subkey_name) else {
             tracing::trace!(registry_key = %subkey_name, "Could not get executable path");
             continue;
         };
@@ -79,10 +69,7 @@ pub fn detect_default_browser() -> Option<Browser> {
     tracing::debug!(registry_key = %registry_key, "Mapped to registry key");
 
     // Get executable path
-    let key = LOCAL_MACHINE
-        .open(r"SOFTWARE\Clients\StartMenuInternet")
-        .ok()?;
-    let executable = get_browser_executable(&key, &registry_key)?;
+    let executable = get_browser_executable(&registry_key)?;
 
     // Build browser
     let browser = build_browser(&registry_key, &executable);
@@ -93,6 +80,29 @@ pub fn detect_default_browser() -> Option<Browser> {
     );
 
     Some(browser)
+}
+
+fn collect_start_menu_internet_subkeys() -> Vec<String> {
+    let mut seen = HashSet::new();
+    let mut merged = Vec::new();
+
+    for root in [CURRENT_USER, LOCAL_MACHINE] {
+        let Ok(key) = root.open(r"SOFTWARE\Clients\StartMenuInternet") else {
+            continue;
+        };
+
+        let Ok(subkeys) = key.keys() else {
+            continue;
+        };
+
+        for name in subkeys {
+            if seen.insert(name.clone()) {
+                merged.push(name);
+            }
+        }
+    }
+
+    merged
 }
 
 /// Get the ProgId for the default HTTP handler.
@@ -132,18 +142,27 @@ fn map_prog_id_to_registry_key(prog_id: &str) -> Option<String> {
 }
 
 /// Get the executable path for a browser from its registry subkey.
-fn get_browser_executable(parent_key: &Key, subkey_name: &str) -> Option<PathBuf> {
-    // Open the browser's subkey
-    let browser_key = parent_key.open(subkey_name).ok()?;
+fn get_browser_executable(subkey_name: &str) -> Option<PathBuf> {
+    for root in [CURRENT_USER, LOCAL_MACHINE] {
+        let Ok(parent_key) = root.open(r"SOFTWARE\Clients\StartMenuInternet") else {
+            continue;
+        };
 
-    // Read shell\open\command default value
+        let Some(executable) = get_browser_executable_from_parent(&parent_key, subkey_name) else {
+            continue;
+        };
+
+        return Some(executable);
+    }
+
+    None
+}
+
+fn get_browser_executable_from_parent(parent_key: &Key, subkey_name: &str) -> Option<PathBuf> {
+    let browser_key = parent_key.open(subkey_name).ok()?;
     let command_key = browser_key.open(r"shell\open\command").ok()?;
     let command_string = command_key.get_string("").ok()?;
-
-    // Parse the command string to extract the executable path
-    let executable = parse_command_to_executable(&command_string)?;
-
-    Some(executable)
+    parse_command_to_executable(&command_string)
 }
 
 /// Parse a command string to extract the executable path.

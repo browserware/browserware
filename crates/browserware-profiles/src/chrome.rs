@@ -38,9 +38,7 @@ pub fn discover_chrome_profiles_from(data_dir: &std::path::Path) -> ProfileDisco
         Err(_) => {
             return ProfileDiscovery {
                 profiles: vec![],
-                capability: LaunchCapability::launch_only(
-                    "Chrome Local State is not valid JSON",
-                ),
+                capability: LaunchCapability::launch_only("Chrome Local State is not valid JSON"),
             };
         }
     };
@@ -58,20 +56,15 @@ pub fn discover_chrome_profiles_from(data_dir: &std::path::Path) -> ProfileDisco
         .iter()
         .map(|(dir_name, meta)| ProfileRef {
             id: dir_name.clone(),
-            display_name: meta["name"]
-                .as_str()
-                .unwrap_or(dir_name)
-                .to_string(),
+            display_name: meta["name"].as_str().unwrap_or(dir_name).to_string(),
         })
         .collect();
 
     // Sort: "Default" first, then alphabetically by id.
-    profiles.sort_by(|a, b| {
-        match (a.id.as_str(), b.id.as_str()) {
-            ("Default", _) => std::cmp::Ordering::Less,
-            (_, "Default") => std::cmp::Ordering::Greater,
-            _ => a.id.cmp(&b.id),
-        }
+    profiles.sort_by(|a, b| match (a.id.as_str(), b.id.as_str()) {
+        ("Default", _) => std::cmp::Ordering::Less,
+        (_, "Default") => std::cmp::Ordering::Greater,
+        _ => a.id.cmp(&b.id),
     });
 
     ProfileDiscovery {

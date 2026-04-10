@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `browserware-detect` crate with full macOS, Windows, and Linux support
   - Discovery-first detection strategy: enumerates all URL handlers from OS, then enriches with metadata
   - Public API: `detect_browsers()`, `detect_browser()`, `detect_default_browser()`, `detect_browsers_by_family()`
-  - Known browser registry with 30 entries (19 Chromium, 8 Firefox, 3 WebKit variants)
+  - Known browser registry expanded with Chromium, Firefox, WebKit, and related browser metadata
   - Full Rustdoc documentation with usage examples
 
 - **macOS Detection** (via Launch Services)

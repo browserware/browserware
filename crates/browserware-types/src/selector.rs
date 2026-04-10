@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::{BrowserContext, BrowserFamily, Error, Result};
 
-
 /// Policy for handling the case where a selector matches multiple contexts.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -71,10 +70,18 @@ impl ContextSelector {
                     "invalid selector segment: {segment:?} (expected key=value)"
                 )));
             };
-            match key.trim() {
-                "family" => sel.family = Some(value.trim().to_string()),
-                "browser" => sel.browser = Some(value.trim().to_string()),
-                "profile" => sel.profile = Some(value.trim().to_string()),
+            let key = key.trim();
+            let value = value.trim();
+            if key.is_empty() || value.is_empty() {
+                return Err(Error::Other(format!(
+                    "empty selector key/value in segment: {segment:?}"
+                )));
+            }
+            let value = decode_selector_value(value)?;
+            match key {
+                "family" => sel.family = Some(value),
+                "browser" => sel.browser = Some(value),
+                "profile" => sel.profile = Some(value),
                 unknown => {
                     return Err(Error::Other(format!(
                         "unknown selector key: {unknown:?} (valid keys: family, browser, profile)"
@@ -94,10 +101,15 @@ impl ContextSelector {
     /// Returns [`Error::Other`] if the input is empty.
     #[must_use = "parsing a selector has no effect if the result is not used"]
     pub fn parse_alias(s: &str) -> Result<Self> {
-        if s.is_empty() {
+        if s.trim().is_empty() {
             return Err(Error::Other("selector alias must not be empty".to_string()));
         }
         match s.split_once(':') {
+            Some((browser, profile)) if browser.trim().is_empty() || profile.trim().is_empty() => {
+                Err(Error::Other(format!(
+                    "empty selector key/value in alias: {s:?}"
+                )))
+            }
             Some((browser, profile)) => Ok(Self {
                 family: None,
                 browser: Some(browser.to_string()),
@@ -187,15 +199,16 @@ impl ContextSelector {
                 AmbiguityPolicy::Warn => {
                     // count = first + second + remaining
                     let count = 2 + iter.count();
-                    tracing::warn!(count, "ambiguous selector matches multiple contexts, using first");
+                    tracing::warn!(
+                        count,
+                        "ambiguous selector matches multiple contexts, using first"
+                    );
                     Ok(Some(first))
                 }
                 AmbiguityPolicy::Error => {
                     // Rebuild the full match list for the error message (only in error branch)
-                    let all: Vec<&BrowserContext> = contexts
-                        .iter()
-                        .filter(|ctx| self.matches(ctx))
-                        .collect();
+                    let all: Vec<&BrowserContext> =
+                        contexts.iter().filter(|ctx| self.matches(ctx)).collect();
                     let count = all.len();
                     let selectors: Vec<&str> = all.iter().map(|c| c.selector()).collect();
                     Err(Error::Other(format!(
@@ -206,6 +219,37 @@ impl ContextSelector {
             },
         }
     }
+}
+
+fn decode_selector_value(value: &str) -> Result<String> {
+    let mut out = String::with_capacity(value.len());
+    let bytes = value.as_bytes();
+    let mut index = 0;
+
+    while index < bytes.len() {
+        if bytes[index] != b'%' {
+            out.push(bytes[index] as char);
+            index += 1;
+            continue;
+        }
+
+        if index + 2 >= bytes.len() {
+            return Err(Error::Other(format!(
+                "invalid percent-encoding in selector value: {value:?}"
+            )));
+        }
+
+        let hex = &value[index + 1..index + 3];
+        let decoded = u8::from_str_radix(hex, 16).map_err(|_| {
+            Error::Other(format!(
+                "invalid percent-encoding in selector value: {value:?}"
+            ))
+        })?;
+        out.push(decoded as char);
+        index += 3;
+    }
+
+    Ok(out)
 }
 
 /// Map a [`BrowserFamily`] to its canonical lowercase string without allocating.
@@ -223,7 +267,10 @@ mod tests {
     use std::path::PathBuf;
 
     use super::*;
-    use crate::{Browser, BrowserContext, BrowserVariant, ChromiumChannel, LaunchCapability, ProfileRef, WebKitChannel};
+    use crate::{
+        Browser, BrowserContext, BrowserVariant, ChromiumChannel, LaunchCapability, ProfileRef,
+        WebKitChannel,
+    };
 
     // ─── test helpers ─────────────────────────────────────────────────────────
 
@@ -241,8 +288,12 @@ mod tests {
 
     fn safari_ctx() -> BrowserContext {
         BrowserContext::new(
-            Browser::new("safari", "Safari", PathBuf::from("/Applications/Safari.app"))
-                .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable)),
+            Browser::new(
+                "safari",
+                "Safari",
+                PathBuf::from("/Applications/Safari.app"),
+            )
+            .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable)),
             None,
             LaunchCapability::launch_only("no profile support"),
         )
@@ -252,7 +303,8 @@ mod tests {
 
     #[test]
     fn parse_canonical_all_fields() {
-        let sel = ContextSelector::parse_canonical("family=chromium,browser=chrome,profile=work").unwrap();
+        let sel = ContextSelector::parse_canonical("family=chromium,browser=chrome,profile=work")
+            .unwrap();
         assert_eq!(sel.family, Some("chromium".to_string()));
         assert_eq!(sel.browser, Some("chrome".to_string()));
         assert_eq!(sel.profile, Some("work".to_string()));
@@ -275,13 +327,31 @@ mod tests {
     #[test]
     fn parse_canonical_rejects_no_equals() {
         let err = ContextSelector::parse_canonical("family=chromium,browser").unwrap_err();
-        assert!(err.to_string().contains("invalid selector segment"), "unexpected error: {err}");
+        assert!(
+            err.to_string().contains("invalid selector segment"),
+            "unexpected error: {err}"
+        );
     }
 
     #[test]
     fn parse_canonical_rejects_unknown_key() {
         let err = ContextSelector::parse_canonical("family=chromium,channel=stable").unwrap_err();
-        assert!(err.to_string().contains("unknown selector key"), "unexpected error: {err}");
+        assert!(
+            err.to_string().contains("unknown selector key"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn parse_canonical_rejects_empty_value() {
+        let err = ContextSelector::parse_canonical("browser=").unwrap_err();
+        assert!(err.to_string().contains("empty selector key/value"));
+    }
+
+    #[test]
+    fn parse_canonical_decodes_percent_escaped_values() {
+        let sel = ContextSelector::parse_canonical("profile=work%2Calpha%3D1%25").unwrap();
+        assert_eq!(sel.profile, Some("work,alpha=1%".to_string()));
     }
 
     // ─── parse_alias ──────────────────────────────────────────────────────────
@@ -305,6 +375,12 @@ mod tests {
     #[test]
     fn parse_alias_rejects_empty() {
         assert!(ContextSelector::parse_alias("").is_err());
+    }
+
+    #[test]
+    fn parse_alias_rejects_empty_profile() {
+        let err = ContextSelector::parse_alias("chrome:").unwrap_err();
+        assert!(err.to_string().contains("empty selector key/value"));
     }
 
     // ─── parse (auto-dispatch) ────────────────────────────────────────────────
@@ -331,6 +407,14 @@ mod tests {
         let ctx = chrome_ctx("Profile 1", "Work");
         let sel = ContextSelector::parse("browser=chrome,profile=Profile 1").unwrap();
         assert!(sel.matches(&ctx));
+    }
+
+    #[test]
+    fn parse_canonical_decoding_matches_selector_encoding() {
+        let profile_id = "work,alpha=1%";
+        let encoded = crate::context::encode_selector_value(profile_id);
+        let sel = ContextSelector::parse_canonical(&format!("profile={encoded}")).unwrap();
+        assert_eq!(sel.profile.as_deref(), Some(profile_id));
     }
 
     #[test]
@@ -410,7 +494,8 @@ mod tests {
         let sel = ContextSelector::parse("browser=chrome").unwrap();
         let err = sel.select(&contexts, AmbiguityPolicy::Error).unwrap_err();
         assert!(
-            err.to_string().contains("ambiguous selector matches 2 contexts"),
+            err.to_string()
+                .contains("ambiguous selector matches 2 contexts"),
             "unexpected error: {err}"
         );
     }

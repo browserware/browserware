@@ -62,16 +62,24 @@ fn browsers_json_format() {
 
 #[test]
 fn browsers_plain_format() {
-    brw()
+    let output = brw()
         .args(["browsers", "--format", "plain"])
         .assert()
-        .success();
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let stdout = String::from_utf8_lossy(&output);
+
     // Plain format should not contain table headers
-    brw()
-        .args(["browsers", "--format", "plain"])
-        .assert()
-        .stdout(predicate::str::contains("ID").not())
-        .stdout(predicate::str::contains("NAME").not());
+    assert!(
+        !stdout.contains("ID"),
+        "plain output unexpectedly contains ID header"
+    );
+    assert!(
+        !stdout.contains("NAME"),
+        "plain output unexpectedly contains NAME header"
+    );
 }
 
 #[test]

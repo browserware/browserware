@@ -10,11 +10,11 @@
 ### Completed
 
 - **browserware-types**: Core types (`Browser`, `BrowserVariant`, `BrowserFamily`, `BrowserId`) with serde support, builder pattern, and comprehensive tests
-- **browserware-detect registry**: 30 known browser entries covering Chromium (19), Firefox (8), and WebKit (3) families with all platform identifiers
+- **browserware-detect registry**: Known browser entries spanning Chromium, Firefox, WebKit, and related variants with platform identifiers
 - **macOS detection**: Full implementation using Launch Services discovery-first approach (see [ADR: Discovery-First Detection](../decisions.md#discovery-first-detection-strategy))
 - **Detection public API**: `detect_browsers()`, `detect_browser()`, `detect_default_browser()`, `detect_browsers_by_family()` with tracing instrumentation
 - **CLI browsers command**: `brw browsers` with `--format table|json|plain`, `--family` filter, default browser `*` indicator
-- **Rustdoc**: All public items documented with examples
+- **Rustdoc**: Public items documented with examples, pending re-verification against current CI
 
 ### Recently Completed
 
@@ -29,6 +29,7 @@
 
 - ⏳ Integration tests for browserware-detect (unit tests exist, integration tests pending)
 - ⏳ Cross-platform CI verification
+- ⏳ `cargo doc` warning-free verification on current CI
 - ⏳ Windows PE version extraction (currently stubbed)
 
 ---
@@ -37,7 +38,7 @@
 
 ### Module Structure
 
-```
+```text
 crates/browserware-detect/
 ├── Cargo.toml
 ├── src/
@@ -145,7 +146,7 @@ Unknown browsers receive:
 - [x] Default browser indicator (`*` prefix)
 - [x] `--family` filter flag
 - [x] CLI integration tests
-- [x] Cross-platform CI verification
+- [ ] Cross-platform CI verification
 
 ### Task 6: Documentation & Release Prep [done]
 
@@ -165,8 +166,8 @@ Unknown browsers receive:
 | 3 | Default browser correctly identified per platform | ✅ Done |
 | 4 | All detected browsers have valid executable paths | ✅ Done |
 | 5 | Versions extracted where possible | ⚠️ Partial (Windows PE extraction pending) |
-| 6 | CI passes on all three platforms | ✅ Done (verified in .github/workflows/ci.yml) |
-| 7 | `cargo doc` builds without warnings | ✅ Done |
+| 6 | CI passes on all three platforms | ⏳ Pending re-verification |
+| 7 | `cargo doc` builds without warnings | ⏳ Pending re-verification |
 | 8 | Minimal, well-documented unsafe FFI for Launch Services | ✅ Done |
 
 ---

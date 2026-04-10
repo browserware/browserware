@@ -46,9 +46,7 @@ fn parse_profiles_ini(contents: &str) -> ProfileDiscovery {
             let section_name = &line[1..line.len() - 1];
 
             // Flush the current profile section if we were in one and have a name
-            if in_profile_section
-                && let Some(name) = current_name.take()
-            {
+            if in_profile_section && let Some(name) = current_name.take() {
                 profiles.push(ProfileRef {
                     id: name.clone(),
                     display_name: name,
@@ -61,17 +59,13 @@ fn parse_profiles_ini(contents: &str) -> ProfileDiscovery {
             } else {
                 in_profile_section = false;
             }
-        } else if in_profile_section
-            && let Some(value) = line.strip_prefix("Name=")
-        {
+        } else if in_profile_section && let Some(value) = line.strip_prefix("Name=") {
             current_name = Some(value.trim().to_string());
         }
     }
 
     // Flush the last profile section
-    if in_profile_section
-        && let Some(name) = current_name.take()
-    {
+    if in_profile_section && let Some(name) = current_name.take() {
         profiles.push(ProfileRef {
             id: name.clone(),
             display_name: name,

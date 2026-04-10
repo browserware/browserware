@@ -3,6 +3,8 @@
 //! This module provides types for representing a discovered browser context,
 //! including profile information and capability flags for launching browsers.
 
+use std::fmt::Write as _;
+
 use serde::{Deserialize, Serialize};
 
 use crate::Browser;
@@ -84,7 +86,11 @@ impl BrowserContext {
     /// The selector is `family=<family>,browser=<id>` optionally followed by
     /// `,profile=<profile.id>` when a profile is provided.
     #[must_use]
-    pub fn new(browser: Browser, profile: Option<ProfileRef>, capability: LaunchCapability) -> Self {
+    pub fn new(
+        browser: Browser,
+        profile: Option<ProfileRef>,
+        capability: LaunchCapability,
+    ) -> Self {
         let selector = build_selector(&browser, profile.as_ref());
         Self {
             browser,
@@ -98,12 +104,26 @@ impl BrowserContext {
 /// Build the selector string from browser and optional profile.
 fn build_selector(browser: &Browser, profile: Option<&ProfileRef>) -> String {
     let base = format!("family={},browser={}", browser.family(), browser.id);
-    // NOTE: profile IDs containing ',' or '=' produce selectors that cannot be
-    // unambiguously parsed back. ContextSelector (Task 2) handles escaping policy.
     match profile {
-        Some(p) => format!("{base},profile={}", p.id),
+        Some(p) => format!("{base},profile={}", encode_selector_value(&p.id)),
         None => base,
     }
+}
+
+#[allow(clippy::redundant_pub_crate)]
+pub(crate) fn encode_selector_value(value: &str) -> String {
+    let mut encoded = String::with_capacity(value.len());
+
+    for ch in value.chars() {
+        match ch {
+            '%' | ',' | '=' => {
+                let _ = write!(encoded, "%{:02X}", ch as u32);
+            }
+            _ => encoded.push(ch),
+        }
+    }
+
+    encoded
 }
 
 #[cfg(test)]
@@ -119,8 +139,12 @@ mod tests {
     }
 
     fn safari_browser() -> Browser {
-        Browser::new("safari", "Safari", PathBuf::from("/Applications/Safari.app"))
-            .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable))
+        Browser::new(
+            "safari",
+            "Safari",
+            PathBuf::from("/Applications/Safari.app"),
+        )
+        .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable))
     }
 
     #[test]
@@ -176,13 +200,29 @@ mod tests {
             display_name: "Work".to_string(),
         };
         let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
-        assert_eq!(ctx.selector(), "family=chromium,browser=chrome,profile=Profile 1");
+        assert_eq!(
+            ctx.selector(),
+            "family=chromium,browser=chrome,profile=Profile 1"
+        );
     }
 
     #[test]
     fn browser_context_selector_no_profile() {
         let ctx = BrowserContext::new(chrome_browser(), None, LaunchCapability::full());
         assert_eq!(ctx.selector(), "family=chromium,browser=chrome");
+    }
+
+    #[test]
+    fn browser_context_selector_escapes_reserved_profile_chars() {
+        let profile = ProfileRef {
+            id: "work,alpha=1%".to_string(),
+            display_name: "Work".to_string(),
+        };
+        let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
+        assert_eq!(
+            ctx.selector(),
+            "family=chromium,browser=chrome,profile=work%2Calpha%3D1%25"
+        );
     }
 
     #[test]

@@ -72,11 +72,7 @@ pub(crate) fn format_table(contexts: &[BrowserContext]) -> String {
 
     let profile_width = contexts
         .iter()
-        .map(|c| {
-            c.profile
-                .as_ref()
-                .map_or(1, |p| p.display_name.len())
-        })
+        .map(|c| c.profile.as_ref().map_or(1, |p| p.display_name.len()))
         .max()
         .unwrap_or(0)
         .max(7);
@@ -94,16 +90,28 @@ pub(crate) fn format_table(contexts: &[BrowserContext]) -> String {
     let _ = writeln!(
         out,
         "{:<sw$}  {:<bw$}  {:<pw$}  {:<lw$}",
-        "SELECTOR", "BROWSER", "PROFILE", "LAUNCH",
-        sw = sw, bw = bw, pw = pw, lw = lw,
+        "SELECTOR",
+        "BROWSER",
+        "PROFILE",
+        "LAUNCH",
+        sw = sw,
+        bw = bw,
+        pw = pw,
+        lw = lw,
     );
 
     // Separator
     let _ = writeln!(
         out,
         "{:-<sw$}  {:-<bw$}  {:-<pw$}  {:-<lw$}",
-        "", "", "", "",
-        sw = sw, bw = bw, pw = pw, lw = lw,
+        "",
+        "",
+        "",
+        "",
+        sw = sw,
+        bw = bw,
+        pw = pw,
+        lw = lw,
     );
 
     // Rows
@@ -121,7 +129,10 @@ pub(crate) fn format_table(contexts: &[BrowserContext]) -> String {
             ctx.browser.name,
             profile_name,
             label,
-            sw = sw, bw = bw, pw = pw, lw = lw,
+            sw = sw,
+            bw = bw,
+            pw = pw,
+            lw = lw,
         );
     }
 
@@ -167,7 +178,7 @@ pub(crate) fn format_json(contexts: &[BrowserContext]) -> String {
 
     match serde_json::to_string_pretty(&output) {
         Ok(json) => json,
-        Err(e) => format!(r#"{{"error": "{e}"}}"#),
+        Err(e) => serde_json::json!({ "error": e.to_string() }).to_string(),
     }
 }
 
@@ -214,8 +225,12 @@ mod tests {
 
     fn safari_ctx() -> BrowserContext {
         BrowserContext::new(
-            Browser::new("safari", "Safari", PathBuf::from("/Applications/Safari.app"))
-                .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable)),
+            Browser::new(
+                "safari",
+                "Safari",
+                PathBuf::from("/Applications/Safari.app"),
+            )
+            .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable)),
             None,
             LaunchCapability::launch_only("WebKit/Safari does not support profile-specific launch"),
         )
@@ -277,7 +292,10 @@ mod tests {
         let out = format_table(&contexts);
         // The row must contain the browser name and a "-" for the absent profile
         assert!(out.contains("Safari"), "missing Safari row");
-        assert!(out.contains(" - ") || out.contains("  -  "), "missing '-' for absent profile");
+        assert!(
+            out.contains(" - ") || out.contains("  -  "),
+            "missing '-' for absent profile"
+        );
     }
 
     // ── Plain tests ───────────────────────────────────────────────────────────
@@ -303,14 +321,21 @@ mod tests {
     #[test]
     fn plain_output_empty_is_empty() {
         let out = format_plain(&[]);
-        assert!(out.trim().is_empty(), "expected empty string for empty slice");
+        assert!(
+            out.trim().is_empty(),
+            "expected empty string for empty slice"
+        );
     }
 
     // ── JSON tests ────────────────────────────────────────────────────────────
 
     #[test]
     fn json_output_is_valid() {
-        let contexts = vec![chrome_ctx("Default", "Personal"), safari_ctx(), firefox_ctx()];
+        let contexts = vec![
+            chrome_ctx("Default", "Personal"),
+            safari_ctx(),
+            firefox_ctx(),
+        ];
         let out = format_json(&contexts);
         let parsed: serde_json::Value = serde_json::from_str(&out).expect("invalid JSON");
         assert!(parsed["contexts"].is_array());
@@ -352,8 +377,7 @@ mod tests {
         let out = format_json(&contexts);
         let parsed: serde_json::Value = serde_json::from_str(&out).expect("invalid JSON");
         assert_eq!(
-            parsed["contexts"][0]["capability"]["profile_launchable"],
-            false,
+            parsed["contexts"][0]["capability"]["profile_launchable"], false,
             "expected profile_launchable=false for Safari"
         );
     }

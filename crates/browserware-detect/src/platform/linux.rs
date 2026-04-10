@@ -130,24 +130,22 @@ fn get_default_browser_desktop_id() -> Option<String> {
 fn get_application_directories() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
 
-    // System directories
-    dirs.push(PathBuf::from("/usr/share/applications"));
-    dirs.push(PathBuf::from("/usr/local/share/applications"));
-
-    // User directory via XDG
+    // User directory via XDG comes first so per-user desktop files override system entries.
     if let Ok(xdg_dirs) = xdg::BaseDirectories::new() {
         dirs.push(xdg_dirs.get_data_home().join("applications"));
     }
 
-    // Fallback to home directory
+    // Fallback user directories
     if let Some(home) = home::home_dir() {
         dirs.push(home.join(".local/share/applications"));
-    }
-
-    // Flatpak
-    if let Some(home) = home::home_dir() {
         dirs.push(home.join(".local/share/flatpak/exports/share/applications"));
     }
+
+    // System directories
+    dirs.push(PathBuf::from("/usr/share/applications"));
+    dirs.push(PathBuf::from("/usr/local/share/applications"));
+
+    // Flatpak
     dirs.push(PathBuf::from("/var/lib/flatpak/exports/share/applications"));
 
     // Snap
@@ -293,9 +291,13 @@ fn parse_exec_to_path(exec: &str) -> PathBuf {
             (&exec[1..], "")
         }
     } else {
-        // Not quoted, split on whitespace
+        // Not quoted, scan tokens and skip wrapper commands / environment assignments.
         let parts: Vec<&str> = exec.split_whitespace().collect();
-        let executable = parts.first().map(|s| *s).unwrap_or(exec);
+        let executable = parts
+            .iter()
+            .copied()
+            .find(|token| !should_skip_exec_token(token))
+            .unwrap_or(exec);
         (executable, "")
     };
 
@@ -377,6 +379,29 @@ fn parse_exec_to_path(exec: &str) -> PathBuf {
     which::which(executable).unwrap_or_else(|_| PathBuf::from(executable))
 }
 
+fn should_skip_exec_token(token: &str) -> bool {
+    if token.is_empty() {
+        return true;
+    }
+
+    if token.contains('=') && !token.contains('/') {
+        return true;
+    }
+
+    matches!(
+        token,
+        "env"
+            | "nohup"
+            | "setsid"
+            | "sudo"
+            | "dbus-launch"
+            | "flatpak-spawn"
+            | "snap"
+            | "sh"
+            | "bash"
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -410,6 +435,14 @@ mod tests {
         assert_eq!(
             parse_exec_to_path("/snap/bin/firefox %u"),
             PathBuf::from("/snap/bin/firefox")
+        );
+    }
+
+    #[test]
+    fn parse_exec_to_path_skips_env_wrapper() {
+        assert_eq!(
+            parse_exec_to_path("env FOO=bar /usr/bin/firefox %u"),
+            PathBuf::from("/usr/bin/firefox")
         );
     }
 

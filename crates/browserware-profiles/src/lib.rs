@@ -222,9 +222,12 @@ mod tests {
 
     #[test]
     fn discover_profiles_webkit_returns_limitation() {
-        let browser =
-            Browser::new("safari", "Safari", PathBuf::from("/Applications/Safari.app"))
-                .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable));
+        let browser = Browser::new(
+            "safari",
+            "Safari",
+            PathBuf::from("/Applications/Safari.app"),
+        )
+        .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable));
         let d = discover_profiles(&browser);
         assert!(!d.capability.profile_launchable);
         assert!(d.profiles.is_empty());
@@ -233,9 +236,12 @@ mod tests {
 
     #[test]
     fn discover_profiles_other_returns_limitation() {
-        let browser =
-            Browser::new("unknown", "Unknown Browser", PathBuf::from("/usr/bin/unknown"))
-                .with_variant(BrowserVariant::Single(BrowserFamily::Other));
+        let browser = Browser::new(
+            "unknown",
+            "Unknown Browser",
+            PathBuf::from("/usr/bin/unknown"),
+        )
+        .with_variant(BrowserVariant::Single(BrowserFamily::Other));
         let d = discover_profiles(&browser);
         assert!(!d.capability.profile_launchable);
         assert!(d.profiles.is_empty());

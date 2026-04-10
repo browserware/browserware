@@ -31,7 +31,7 @@ For comprehensive architecture documentation, see [AGENTS.md](../AGENTS.md).
 | `browserware-launch` | "Run this browser with these options" | Scaffold |
 | `browserware-rules` | "Which browser/profile for this URL?" | Scaffold |
 | `browserware-system` | "OS integration (default browser, etc.)" | Scaffold |
-| `browserware-cli` | User-facing CLI (`brw` binary) | Active (`browsers`, `contexts`, `open`) |
+| `browserware-cli` | User-facing CLI (`brw` binary) | Active (`browsers`, `contexts`), partial (`open`) |
 
 ## Data Flow
 
@@ -48,7 +48,7 @@ Example: `brw open https://example.com`
 
 Example: `brw contexts`
 
-```
+```text
 1. CLI resolves output format and filters
 2. detect::detect_browsers() → installed browsers
 3. profiles::* discovery → browser contexts and selectors

@@ -5,8 +5,7 @@ use std::path::PathBuf;
 #[test]
 fn chrome_multi_profiles_integration() {
     let d = browserware_profiles::discover_chrome_profiles_from(
-        &PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("tests/fixtures/chrome_multi"),
+        &PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/chrome_multi"),
     );
     assert!(d.capability.profile_launchable);
     assert_eq!(d.profiles.len(), 2);
@@ -16,9 +15,9 @@ fn chrome_multi_profiles_integration() {
 
 #[test]
 fn chrome_inaccessible_returns_limitation() {
-    let d = browserware_profiles::discover_chrome_profiles_from(
-        &PathBuf::from("/nonexistent/chrome/dir"),
-    );
+    let d = browserware_profiles::discover_chrome_profiles_from(&PathBuf::from(
+        "/nonexistent/chrome/dir",
+    ));
     assert!(!d.capability.profile_launchable);
     assert!(d.profiles.is_empty());
     assert!(!d.capability.limitations.is_empty());
@@ -50,9 +49,9 @@ fn firefox_default_only_integration() {
 
 #[test]
 fn firefox_missing_ini_returns_limitation() {
-    let d = browserware_profiles::discover_firefox_profiles_from(
-        &PathBuf::from("/nonexistent/firefox/profiles.ini"),
-    );
+    let d = browserware_profiles::discover_firefox_profiles_from(&PathBuf::from(
+        "/nonexistent/firefox/profiles.ini",
+    ));
     assert!(!d.capability.profile_launchable);
     assert!(d.profiles.is_empty());
 }
@@ -60,8 +59,12 @@ fn firefox_missing_ini_returns_limitation() {
 #[test]
 fn discover_profiles_safari_no_profile_launch() {
     use browserware_types::{Browser, BrowserVariant, WebKitChannel};
-    let browser = Browser::new("safari", "Safari", PathBuf::from("/Applications/Safari.app"))
-        .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable));
+    let browser = Browser::new(
+        "safari",
+        "Safari",
+        PathBuf::from("/Applications/Safari.app"),
+    )
+    .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable));
     let d = browserware_profiles::discover_profiles(&browser);
     assert!(!d.capability.profile_launchable);
     assert!(d.profiles.is_empty());
