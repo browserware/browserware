@@ -148,8 +148,13 @@ cargo test -p browserware-cli --test cli
 ```bash
 cargo run -p browserware-cli -- --help
 cargo run -p browserware-cli -- browsers
+cargo run -p browserware-cli -- contexts
 cargo run -p browserware-cli -- open https://example.com
 ```
+
+## AI Assistant Context
+
+`just setup` creates assistant-friendly symlinks. For coding agents working in this repo, start with [AGENTS.md](AGENTS.md) and load [`.context/RUST_MODERN.md`](.context/RUST_MODERN.md) for the current Rust style guide.
 
 ## License
 

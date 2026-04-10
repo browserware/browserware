@@ -16,6 +16,7 @@
 # Test artifacts
 *.log
 coverage/
+.gstack/
 
 # Generated symlinks (created by 'just setup')
 CLAUDE.md

@@ -14,6 +14,9 @@ cargo install browserware-cli
 # List detected browsers
 brw browsers
 
+# List launchable browser contexts
+brw contexts
+
 # Open URL with routing
 brw open https://github.com
 ```
@@ -31,7 +34,7 @@ brw open https://github.com
 ## AI Assistant Context
 
 This repo includes context files for AI coding assistants in `.context/`.
-These files help AI tools understand modern Rust features and project conventions.
+Start with [`AGENTS.md`](AGENTS.md), then load [`.context/RUST_MODERN.md`](.context/RUST_MODERN.md) for the Rust 1.88+ coding guidance shared with Claude-compatible agents and other coding assistants.
 
 ## License
 

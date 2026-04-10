@@ -3,6 +3,8 @@
 This document provides context, guidelines, and principles for AI coding assistants
 (GitHub Copilot, Claude, Cursor, etc.) working on the browserware codebase.
 
+Load [`.context/RUST_MODERN.md`](.context/RUST_MODERN.md) alongside this file for the repo's Rust 1.88+ style guidance.
+
 ---
 
 ## Project Vision
@@ -115,9 +117,9 @@ a fundamental platform limitation.
 
 | Crate | Single Question | Published |
 |-------|-----------------|-----------|
-| `browserware-types` | Shared types | crates.io ✅ |
+| `browserware-types` | Shared types and browser-context selectors | crates.io ✅ |
 | `browserware-detect` | "What browsers exist?" | crates.io ✅ |
-| `browserware-profiles` | "What profiles exist?" | crates.io ✅ |
+| `browserware-profiles` | "What profiles and contexts exist?" | crates.io ✅ |
 | `browserware-launch` | "Run this browser" | crates.io ✅ |
 | `browserware-rules` | "Which browser for URL?" | crates.io ✅ |
 | `browserware-system` | "OS integration" | crates.io ✅ |
@@ -238,6 +240,14 @@ When adding support for a new browser (e.g., Arc):
 1. Add variant to `Commands` enum in `browserware-cli/src/main.rs`
 2. Implement handler in `match` block
 3. Add integration test in `tests/cli.rs`
+
+### CLI Surface Area
+
+Current public commands include:
+
+- `brw browsers` for installed browser detection
+- `brw contexts` for launchable browser contexts and selectors
+- `brw open <url>` for routing and launch
 
 ---
 

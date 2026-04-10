@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-11
+
 ### Added
 
 - **Milestone 1: Cross-Platform Browser Detection**
@@ -42,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `--family` filter (chromium, firefox, webkit, other)
   - Default browser indicator (`*` prefix in table, `(default)` suffix in plain, boolean field in JSON)
   - Comprehensive CLI integration tests
+  - `brw contexts` command with table, JSON, and plain output for browser-profile contexts
+
+- **Browser Context Substrate**
+  - `browserware-types` adds `ProfileRef`, `LaunchCapability`, `BrowserContext`, `ContextSelector`, and `AmbiguityPolicy`
+  - `browserware-profiles` adds Chrome-family and Firefox profile discovery with deterministic fixture coverage
+  - `browserware-detect` registers Helium and ChatGPT Atlas as Chromium-family browsers for context discovery
 
 ## [0.1.0] - 2026-01-10
 
@@ -63,5 +71,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workspace-level lints (clippy pedantic + nursery)
 - cargo-deny for dependency security and license compliance
 
-[Unreleased]: https://github.com/browserware/browserware/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/browserware/browserware/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/browserware/browserware/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/browserware/browserware/releases/tag/v0.1.0

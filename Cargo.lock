@@ -102,7 +102,7 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "browserware-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -119,7 +119,7 @@ dependencies = [
 
 [[package]]
 name = "browserware-detect"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "browserware-types",
  "core-foundation",
@@ -133,7 +133,7 @@ dependencies = [
 
 [[package]]
 name = "browserware-launch"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "browserware-types",
@@ -142,7 +142,7 @@ dependencies = [
 
 [[package]]
 name = "browserware-profiles"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "browserware-types",
  "serde",
@@ -153,21 +153,21 @@ dependencies = [
 
 [[package]]
 name = "browserware-rules"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "browserware-types",
 ]
 
 [[package]]
 name = "browserware-system"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
 ]
 
 [[package]]
 name = "browserware-types"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
