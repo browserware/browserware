@@ -93,6 +93,7 @@ fn chrome_user_data_dir(browser: &Browser) -> Option<PathBuf> {
             "chromium" => "Chromium",
             "vivaldi" => "Vivaldi",
             "opera" => "com.operasoftware.Opera",
+            "helium" => "net.imput.helium",
             _ => return None,
         };
         Some(base.join(dir_name))
