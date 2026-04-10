@@ -56,3 +56,14 @@ fn firefox_missing_ini_returns_limitation() {
     assert!(!d.capability.profile_launchable);
     assert!(d.profiles.is_empty());
 }
+
+#[test]
+fn discover_profiles_safari_no_profile_launch() {
+    use browserware_types::{Browser, BrowserVariant, WebKitChannel};
+    let browser = Browser::new("safari", "Safari", PathBuf::from("/Applications/Safari.app"))
+        .with_variant(BrowserVariant::WebKit(WebKitChannel::Stable));
+    let d = browserware_profiles::discover_profiles(&browser);
+    assert!(!d.capability.profile_launchable);
+    assert!(d.profiles.is_empty());
+    assert!(!d.capability.limitations.is_empty());
+}
