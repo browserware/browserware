@@ -284,13 +284,20 @@ mod tests {
 
     #[test]
     fn plain_output_one_selector_per_line() {
-        let contexts = vec![chrome_ctx("Default", "Personal"), firefox_ctx()];
+        let contexts = vec![chrome_ctx("Default", "Personal"), safari_ctx()];
         let out = format_plain(&contexts);
         let lines: Vec<&str> = out.lines().collect();
         assert_eq!(lines.len(), 2, "expected 2 lines, got: {lines:?}");
-        for line in &lines {
-            assert!(line.contains("family="), "line missing 'family=': {line}");
-        }
+        assert!(
+            lines[0].contains("family=chromium"),
+            "line 0 missing 'family=chromium': {}",
+            lines[0]
+        );
+        assert!(
+            lines[1].contains("family=webkit"),
+            "line 1 missing 'family=webkit': {}",
+            lines[1]
+        );
     }
 
     #[test]
@@ -340,7 +347,7 @@ mod tests {
     }
 
     #[test]
-    fn json_output_profile_launchable_false_for_limited() {
+    fn json_output_profile_launchable_false_for_basic() {
         let contexts = vec![safari_ctx()];
         let out = format_json(&contexts);
         let parsed: serde_json::Value = serde_json::from_str(&out).expect("invalid JSON");
