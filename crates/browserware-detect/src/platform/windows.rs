@@ -222,7 +222,7 @@ fn build_browser(registry_key: &str, executable: &Path) -> Browser {
 /// Build a Browser from known registry metadata.
 fn build_browser_from_meta(
     meta: &'static registry::BrowserMeta,
-    registry_key: &str,
+    _registry_key: &str,
     executable: &Path,
 ) -> Browser {
     let version = extract_version_from_executable(executable);

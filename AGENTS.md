@@ -148,6 +148,14 @@ a fundamental platform limitation.
 - **Formatting**: `rustfmt` with project `.rustfmt.toml`
 - **Lints**: `clippy` with workspace lints (pedantic + nursery)
 
+### Tooling And Validation
+
+- Use `mise` whenever a task depends on a specific Rust or cargo-tool version.
+- `mise.toml` pins the default stable toolchain and the validation subcommands used in local development.
+- Before opening a PR, run `mise exec cargo:just@1.49.0 -- just validate`.
+- If you touched portability-sensitive code, also run `mise exec cargo:just@1.49.0 -- just validate-targets`.
+- Prefer the `just ci-*` recipes over ad hoc cargo commands when you are trying to mirror CI behavior.
+
 ### Naming
 
 ```rust

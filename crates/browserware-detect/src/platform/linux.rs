@@ -131,8 +131,9 @@ fn get_application_directories() -> Vec<PathBuf> {
     let mut dirs = Vec::new();
 
     // User directory via XDG comes first so per-user desktop files override system entries.
-    if let Ok(xdg_dirs) = xdg::BaseDirectories::new() {
-        dirs.push(xdg_dirs.get_data_home().join("applications"));
+    let xdg_dirs = xdg::BaseDirectories::new();
+    if let Some(data_home) = xdg_dirs.get_data_home() {
+        dirs.push(data_home.join("applications"));
     }
 
     // Fallback user directories
