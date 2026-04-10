@@ -160,7 +160,7 @@ fn find_desktop_file(desktop_id: &str) -> Option<PathBuf> {
     let app_dirs = get_application_directories();
 
     for app_dir in app_dirs {
-        let desktop_file = app_dir.join(format!("{}.desktop", desktop_id));
+        let desktop_file = app_dir.join(format!("{desktop_id}.desktop"));
         if desktop_file.exists() {
             return Some(desktop_file);
         }
@@ -267,40 +267,39 @@ fn build_unknown_browser(desktop_id: &str, entry: &DesktopEntry) -> Browser {
 ///
 /// Desktop file Exec= fields can contain arguments and field codes like %U, %F, etc.
 /// This function extracts just the executable path.
+fn parse_quoted_exec(stripped: &str, quote: char) -> (&str, &str) {
+    stripped.find(quote).map_or_else(
+        || (stripped, ""),
+        |end_quote| {
+            let path = &stripped[..end_quote];
+            let remaining = &stripped[end_quote + 1..];
+            (path, remaining)
+        },
+    )
+}
+
 fn parse_exec_to_path(exec: &str) -> PathBuf {
     let exec = exec.trim();
 
     // Handle quoted paths first (before splitting on whitespace)
-    let (executable, remaining) = if exec.starts_with('"') {
-        // Find closing quote
-        if let Some(end_quote) = exec[1..].find('"') {
-            let path = &exec[1..end_quote + 1];
-            let remaining = &exec[end_quote + 2..];
-            (path, remaining)
-        } else {
-            // Unclosed quote, treat as unquoted
-            (&exec[1..], "")
-        }
-    } else if exec.starts_with('\'') {
-        // Find closing quote
-        if let Some(end_quote) = exec[1..].find('\'') {
-            let path = &exec[1..end_quote + 1];
-            let remaining = &exec[end_quote + 2..];
-            (path, remaining)
-        } else {
-            // Unclosed quote, treat as unquoted
-            (&exec[1..], "")
-        }
-    } else {
-        // Not quoted, scan tokens and skip wrapper commands / environment assignments.
-        let parts: Vec<&str> = exec.split_whitespace().collect();
-        let executable = parts
-            .iter()
-            .copied()
-            .find(|token| !should_skip_exec_token(token))
-            .unwrap_or(exec);
-        (executable, "")
-    };
+    let (executable, remaining) = exec.strip_prefix('"').map_or_else(
+        || {
+            exec.strip_prefix('\'').map_or_else(
+                || {
+                    // Not quoted, scan tokens and skip wrapper commands / environment assignments.
+                    let parts: Vec<&str> = exec.split_whitespace().collect();
+                    let executable = parts
+                        .iter()
+                        .copied()
+                        .find(|token| !should_skip_exec_token(token))
+                        .unwrap_or(exec);
+                    (executable, "")
+                },
+                |stripped| parse_quoted_exec(stripped, '\''),
+            )
+        },
+        |stripped| parse_quoted_exec(stripped, '"'),
+    );
 
     // Parse remaining for flatpak/snap detection
     let parts: Vec<&str> = if remaining.is_empty() {
@@ -315,53 +314,53 @@ fn parse_exec_to_path(exec: &str) -> PathBuf {
     if executable.ends_with("/flatpak-spawn") || executable == "flatpak" {
         // Try to extract the actual app from the command
         // Flatpak commands look like: flatpak run org.mozilla.firefox
-        if let Some(app_pos) = parts.iter().position(|&p| p == "run") {
-            if let Some(app_id) = parts.get(app_pos + 1) {
-                // For Flatpak apps, try to find the actual executable
-                // Check common locations for the app's files
-                let app_id = app_id.trim_matches('"').trim_matches('\'');
-                let base_paths = [
-                    format!("/var/lib/flatpak/app/{app_id}/current/active/files/bin"),
-                    format!("/var/lib/flatpak/app/{app_id}/current/active/files/lib"),
-                    home::home_dir()
-                        .map(|h| {
-                            format!(
-                                "{}/.local/share/flatpak/app/{app_id}/current/active/files/bin",
-                                h.display()
-                            )
-                        })
-                        .unwrap_or_default(),
-                ];
+        if let Some(app_pos) = parts.iter().position(|&p| p == "run")
+            && let Some(app_id) = parts.get(app_pos + 1)
+        {
+            // For Flatpak apps, try to find the actual executable
+            // Check common locations for the app's files
+            let app_id = app_id.trim_matches('"').trim_matches('\'');
+            let base_paths = [
+                format!("/var/lib/flatpak/app/{app_id}/current/active/files/bin"),
+                format!("/var/lib/flatpak/app/{app_id}/current/active/files/lib"),
+                home::home_dir()
+                    .map(|h| {
+                        format!(
+                            "{}/.local/share/flatpak/app/{app_id}/current/active/files/bin",
+                            h.display()
+                        )
+                    })
+                    .unwrap_or_default(),
+            ];
 
-                // Try to find the executable in standard locations
-                for base_path in &base_paths {
-                    if base_path.is_empty() {
-                        continue;
-                    }
-                    let base = PathBuf::from(base_path);
-                    if let Ok(entries) = std::fs::read_dir(&base) {
-                        // Look for the first executable file (simple heuristic)
-                        for entry in entries.flatten() {
-                            let path = entry.path();
-                            if path.is_file() {
-                                // Check if file is executable
-                                #[cfg(unix)]
+            // Try to find the executable in standard locations
+            for base_path in &base_paths {
+                if base_path.is_empty() {
+                    continue;
+                }
+                let base = PathBuf::from(base_path);
+                if let Ok(entries) = std::fs::read_dir(&base) {
+                    // Look for the first executable file (simple heuristic)
+                    for entry in entries.flatten() {
+                        let path = entry.path();
+                        if path.is_file() {
+                            // Check if file is executable
+                            #[cfg(unix)]
+                            {
+                                use std::os::unix::fs::PermissionsExt;
+                                if let Ok(metadata) = std::fs::metadata(&path)
+                                    && metadata.permissions().mode() & 0o111 != 0
                                 {
-                                    use std::os::unix::fs::PermissionsExt;
-                                    if let Ok(metadata) = std::fs::metadata(&path) {
-                                        if metadata.permissions().mode() & 0o111 != 0 {
-                                            return path;
-                                        }
-                                    }
+                                    return path;
                                 }
                             }
                         }
                     }
                 }
-
-                // Fallback: return flatpak command format that can be used for identification
-                return PathBuf::from(format!("flatpak run {app_id}"));
             }
+
+            // Fallback: return flatpak command format that can be used for identification
+            return PathBuf::from(format!("flatpak run {app_id}"));
         }
     }
 
@@ -449,11 +448,11 @@ mod tests {
 
     #[test]
     fn parse_desktop_file_extracts_name_and_exec() {
-        let content = r#"[Desktop Entry]
+        let content = r"[Desktop Entry]
 Name=Firefox
 Exec=/usr/bin/firefox %u
 MimeType=x-scheme-handler/http;x-scheme-handler/https;
-"#;
+";
 
         let temp_file = std::env::temp_dir().join("test.desktop");
         std::fs::write(&temp_file, content).unwrap();
@@ -468,11 +467,11 @@ MimeType=x-scheme-handler/http;x-scheme-handler/https;
 
     #[test]
     fn parse_desktop_file_filters_non_http_handlers() {
-        let content = r#"[Desktop Entry]
+        let content = r"[Desktop Entry]
 Name=TextEditor
 Exec=/usr/bin/editor %f
 MimeType=text/plain;
-"#;
+";
 
         let temp_file = std::env::temp_dir().join("test-editor.desktop");
         std::fs::write(&temp_file, content).unwrap();

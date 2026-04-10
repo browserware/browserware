@@ -39,8 +39,8 @@ check: validate
 
 # Run the local pre-PR validation pipeline. This mirrors the CI job coverage
 # available on the current host and pins tool versions through mise.
-validate: ci-rustfmt ci-clippy ci-docs ci-deny ci-audit ci-test-stable ci-test-msrv
-    @echo "Validation passed for rustfmt, clippy, docs, cargo-deny, cargo-audit, stable tests, and MSRV tests."
+validate: ci-rustfmt ci-clippy ci-clippy-linux-stable ci-docs ci-deny ci-audit ci-test-stable ci-test-msrv
+    @echo "Validation passed for rustfmt, host clippy, Linux CI clippy, docs, cargo-deny, cargo-audit, stable tests, and MSRV tests."
 
 # Optional compile-only CI smoke tests for non-native targets.
 validate-targets: ci-check-linux-stable ci-check-linux-msrv ci-check-windows-stable ci-check-windows-msrv
@@ -55,6 +55,9 @@ ci-clippy:
     mise exec {{stable_rust}} -- rustup component add clippy
     mise exec {{stable_rust}} -- cargo clippy --workspace --all-targets --locked -- -D warnings
 
+ci-clippy-linux-stable: install-ci-targets
+    mise exec {{stable_rust}} -- cargo clippy --workspace --all-targets --locked --target {{linux_target}} -- -D warnings
+
 ci-docs:
     RUSTDOCFLAGS="-D warnings" mise exec {{stable_rust}} -- cargo doc --workspace --no-deps --all-features --locked
 
@@ -65,7 +68,7 @@ ci-deny:
     mise exec {{stable_rust}} -- cargo deny check sources
 
 ci-audit:
-    db_dir="$$(mktemp -d "${TMPDIR:-/tmp}/browserware-cargo-audit.XXXXXX")"; trap 'rm -rf "$$db_dir"' EXIT; mise exec {{stable_rust}} -- cargo audit --deny warnings --db "$$db_dir"
+    db_dir="$(mktemp -d "${TMPDIR:-/tmp}/browserware-cargo-audit.XXXXXX")"; trap 'rm -rf "$db_dir"' EXIT; mise exec {{stable_rust}} -- cargo audit --deny warnings --db "$db_dir"
 
 ci-test-stable:
     mise exec {{stable_rust}} -- cargo test --workspace --all-targets --locked
