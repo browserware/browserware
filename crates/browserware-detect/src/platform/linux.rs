@@ -301,9 +301,13 @@ fn parse_exec_to_path(exec: &str) -> PathBuf {
         |stripped| parse_quoted_exec(stripped, '"'),
     );
 
-    // Parse remaining for flatpak/snap detection
+    // Parse all tokens for flatpak/snap detection.
+    // For unquoted Exec= fields the `remaining` returned above is always "", so we
+    // fall back to re-splitting the full exec string.  This ensures that a command
+    // like `flatpak run org.mozilla.firefox %U` still reaches the "run" detection
+    // below even though the wrapper-skipping logic only returned `executable`.
     let parts: Vec<&str> = if remaining.is_empty() {
-        vec![executable]
+        exec.split_whitespace().collect()
     } else {
         let mut v = vec![executable];
         v.extend(remaining.split_whitespace());
@@ -385,7 +389,13 @@ fn should_skip_exec_token(token: &str) -> bool {
         return true;
     }
 
+    // Environment variable assignments like FOO=bar
     if token.contains('=') && !token.contains('/') {
+        return true;
+    }
+
+    // Command-line flags like --host, -c, --app=org.foo
+    if token.starts_with('-') && !token.contains('/') {
         return true;
     }
 

@@ -103,7 +103,11 @@ impl BrowserContext {
 
 /// Build the selector string from browser and optional profile.
 fn build_selector(browser: &Browser, profile: Option<&ProfileRef>) -> String {
-    let base = format!("family={},browser={}", browser.family(), browser.id);
+    let base = format!(
+        "family={},browser={}",
+        encode_selector_value(&browser.family().to_string()),
+        encode_selector_value(&browser.id.to_string()),
+    );
     match profile {
         Some(p) => format!("{base},profile={}", encode_selector_value(&p.id)),
         None => base,
