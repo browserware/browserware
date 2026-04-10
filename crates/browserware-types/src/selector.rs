@@ -6,7 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{BrowserContext, Error, Result};
+use crate::{BrowserContext, BrowserFamily, Error, Result};
 
 
 /// Policy for handling the case where a selector matches multiple contexts.
@@ -52,6 +52,8 @@ impl ContextSelector {
     /// Valid keys are `family`, `browser`, and `profile`. Empty segments
     /// (after trimming) are silently skipped. Returns [`Error::Other`] if
     /// any segment contains no `=` character or uses an unknown key.
+    ///
+    /// If the same key appears more than once, the last value wins.
     ///
     /// # Errors
     ///
@@ -132,7 +134,7 @@ impl ContextSelector {
     #[must_use]
     pub fn matches(&self, ctx: &BrowserContext) -> bool {
         if let Some(family) = &self.family
-            && *family != ctx.browser.family().to_string()
+            && family.as_str() != family_as_str(ctx.browser.family())
         {
             return false;
         }
@@ -173,24 +175,46 @@ impl ContextSelector {
         contexts: &'a [BrowserContext],
         policy: AmbiguityPolicy,
     ) -> Result<Option<&'a BrowserContext>> {
-        let matches: Vec<&BrowserContext> = contexts.iter().filter(|ctx| self.matches(ctx)).collect();
-        match matches.len() {
-            0 => Ok(None),
-            1 => Ok(Some(matches[0])),
-            count => match policy {
-                AmbiguityPolicy::First => Ok(Some(matches[0])),
+        let mut iter = contexts.iter().filter(|ctx| self.matches(ctx));
+        let first = iter.next();
+        let second = iter.next();
+
+        match first {
+            None => Ok(None),
+            Some(first) if second.is_none() => Ok(Some(first)),
+            Some(first) => match policy {
+                AmbiguityPolicy::First => Ok(Some(first)),
                 AmbiguityPolicy::Warn => {
+                    // count = first + second + remaining
+                    let count = 2 + iter.count();
                     tracing::warn!(count, "ambiguous selector matches multiple contexts, using first");
-                    Ok(Some(matches[0]))
+                    Ok(Some(first))
                 }
                 AmbiguityPolicy::Error => {
-                    let selectors = matches.iter().map(|ctx| ctx.selector()).collect::<Vec<_>>().join(", ");
+                    // Rebuild the full match list for the error message (only in error branch)
+                    let all: Vec<&BrowserContext> = contexts
+                        .iter()
+                        .filter(|ctx| self.matches(ctx))
+                        .collect();
+                    let count = all.len();
+                    let selectors: Vec<&str> = all.iter().map(|c| c.selector()).collect();
                     Err(Error::Other(format!(
-                        "ambiguous selector matches {count} contexts: {selectors}"
+                        "ambiguous selector matches {count} contexts: {}",
+                        selectors.join(", ")
                     )))
                 }
             },
         }
+    }
+}
+
+/// Map a [`BrowserFamily`] to its canonical lowercase string without allocating.
+const fn family_as_str(family: BrowserFamily) -> &'static str {
+    match family {
+        BrowserFamily::Chromium => "chromium",
+        BrowserFamily::Firefox => "firefox",
+        BrowserFamily::WebKit => "webkit",
+        BrowserFamily::Other => "other",
     }
 }
 
@@ -240,6 +264,12 @@ mod tests {
         assert_eq!(sel.family, None);
         assert_eq!(sel.browser, Some("chrome".to_string()));
         assert_eq!(sel.profile, None);
+    }
+
+    #[test]
+    fn parse_canonical_duplicate_key_last_wins() {
+        let sel = ContextSelector::parse_canonical("browser=chrome,browser=firefox").unwrap();
+        assert_eq!(sel.browser.as_deref(), Some("firefox"));
     }
 
     #[test]
