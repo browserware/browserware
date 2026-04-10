@@ -7,10 +7,12 @@
 #![warn(missing_docs)]
 
 mod browser;
+mod context;
 mod error;
 mod variant;
 
 pub use browser::{Browser, BrowserFamily, BrowserId};
+pub use context::{BrowserContext, LaunchCapability, ProfileRef};
 pub use error::{Error, Result};
 pub use variant::{BrowserVariant, ChromiumChannel, FirefoxChannel, WebKitChannel};
 
