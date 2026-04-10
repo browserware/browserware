@@ -11,7 +11,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
@@ -30,12 +30,12 @@ nursery = "warn"
 
 [workspace.dependencies]
 # Internal crates
-browserware-types = { version = "0.1.0", path = "crates/browserware-types" }
-browserware-detect = { version = "0.1.0", path = "crates/browserware-detect" }
-browserware-profiles = { version = "0.1.0", path = "crates/browserware-profiles" }
-browserware-launch = { version = "0.1.0", path = "crates/browserware-launch" }
-browserware-rules = { version = "0.1.0", path = "crates/browserware-rules" }
-browserware-system = { version = "0.1.0", path = "crates/browserware-system" }
+browserware-types = { version = "0.2.0", path = "crates/browserware-types" }
+browserware-detect = { version = "0.2.0", path = "crates/browserware-detect" }
+browserware-profiles = { version = "0.2.0", path = "crates/browserware-profiles" }
+browserware-launch = { version = "0.2.0", path = "crates/browserware-launch" }
+browserware-rules = { version = "0.2.0", path = "crates/browserware-rules" }
+browserware-system = { version = "0.2.0", path = "crates/browserware-system" }
 
 # Serialization
 serde = { version = "1.0.228", features = ["derive"] }
@@ -59,3 +59,4 @@ url = { version = "2.5.8", features = ["serde"] }
 # Testing
 assert_cmd = "2.1.2"
 predicates = "3.1.3"
+tempfile = "3"

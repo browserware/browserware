@@ -6,13 +6,13 @@ For organization-wide policies, see the [.github repository](https://github.com/
 
 ## Prerequisites
 
-- **Rust 1.88+** (Edition 2024)
+- **[mise](https://mise.jdx.dev/)** for pinned local tool versions
 - **Git** with DCO sign-off configured
 
-Verify your Rust version:
+Install the pinned toolchain and validation tools:
 
 ```bash
-rustc --version  # Should be 1.88.0 or later
+mise install
 ```
 
 ## Development Setup
@@ -20,29 +20,31 @@ rustc --version  # Should be 1.88.0 or later
 ```bash
 git clone https://github.com/browserware/browserware.git
 cd browserware
-just setup    # Creates AI assistant symlinks
-cargo build --workspace
-cargo test --workspace
+mise exec cargo:just@1.49.0 -- just setup    # Creates AI assistant symlinks
+mise exec cargo:just@1.49.0 -- just build
+mise exec cargo:just@1.49.0 -- just test
 ```
 
-> **Note**: Install [just](https://github.com/casey/just) with `cargo install just`
+> `mise.toml` pins the Rust toolchain plus `just`, `cargo-deny`, and `cargo-audit`. Run all repo validation through `just` so your local checks match CI as closely as possible.
 
 ### Useful Commands
 
 ```bash
-just          # List all available tasks
-just check    # Run all CI checks
-just fmt      # Format code
-just test     # Run tests
-just docs     # Build and open documentation
-just clean    # Clean build artifacts + symlinks
+mise exec cargo:just@1.49.0 -- just          # List all available tasks
+mise exec cargo:just@1.49.0 -- just validate # Run the full local pre-PR pipeline
+mise exec cargo:just@1.49.0 -- just validate-targets  # Optional Linux/Windows compile smoke checks
+mise exec cargo:just@1.49.0 -- just fmt      # Format code
+mise exec cargo:just@1.49.0 -- just test     # Run tests
+mise exec cargo:just@1.49.0 -- just docs     # Build and open documentation
+mise exec cargo:just@1.49.0 -- just clean    # Clean build artifacts + symlinks
 ```
 
-Or directly with cargo:
+Or directly with `mise exec` when you need a specific toolchain:
 
 ```bash
-cargo test -p browserware-types    # Test specific crate
-cargo run -p browserware-cli -- --help
+mise exec rust@1.94.1 -- cargo test -p browserware-types --locked
+mise exec rust@1.88.0 -- cargo test --workspace --all-targets --locked
+mise exec rust@1.94.1 -- cargo run -p browserware-cli -- --help
 ```
 
 ## Code Quality
@@ -51,13 +53,15 @@ This project enforces strict quality standards:
 
 | Check | Command | CI Job |
 |-------|---------|--------|
-| Formatting | `cargo fmt --all -- --check` | `fmt` |
-| Linting | `cargo clippy --workspace --all-targets -- -D warnings` | `clippy` |
-| Tests | `cargo test --workspace` | `test` |
-| Dependencies | `cargo deny check` | `deny` |
-| Documentation | `cargo doc --workspace --no-deps` | `docs` |
+| Formatting | `just ci-rustfmt` | `fmt` |
+| Linting | `just ci-clippy` | `clippy` |
+| Documentation | `just ci-docs` | `docs` |
+| Dependencies | `just ci-deny` | `deny` |
+| Security Audit | `just ci-audit` | `audit` |
+| Tests (stable) | `just ci-test-stable` | `test (stable)` |
+| Tests (MSRV 1.88.0) | `just ci-test-msrv` | `test (1.88)` |
 
-All checks must pass before merge.
+Run `just validate` before opening a PR. On macOS or Linux, `just validate-targets` adds compile-only smoke checks for the Linux and Windows targets that CI also exercises.
 
 ## Making Changes
 
@@ -134,22 +138,27 @@ Each crate has a single responsibility. See [AGENTS.md](https://github.com/brows
 ### Unit Tests
 
 ```bash
-cargo test --workspace
+just test
 ```
 
 ### Integration Tests
 
 ```bash
-cargo test -p browserware-cli --test cli
+mise exec rust@1.94.1 -- cargo test -p browserware-cli --test cli --locked
 ```
 
 ### Manual Testing
 
 ```bash
-cargo run -p browserware-cli -- --help
-cargo run -p browserware-cli -- browsers
-cargo run -p browserware-cli -- open https://example.com
+mise exec rust@1.94.1 -- cargo run -p browserware-cli -- --help
+mise exec rust@1.94.1 -- cargo run -p browserware-cli -- browsers
+mise exec rust@1.94.1 -- cargo run -p browserware-cli -- contexts
+mise exec rust@1.94.1 -- cargo run -p browserware-cli -- open https://example.com
 ```
+
+## AI Assistant Context
+
+`just setup` creates assistant-friendly symlinks. For coding agents working in this repo, start with [AGENTS.md](AGENTS.md), load [`.context/RUST_MODERN.md`](.context/RUST_MODERN.md), and use `mise exec` or the `just ci-*` recipes whenever a task depends on a specific Rust or cargo-tool version.
 
 ## License
 

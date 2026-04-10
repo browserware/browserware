@@ -25,13 +25,13 @@ For comprehensive architecture documentation, see [AGENTS.md](../AGENTS.md).
 
 | Crate | Question It Answers | Status |
 |-------|---------------------|--------|
-| `browserware-types` | Shared types (`Browser`, `Profile`, etc.) | In progress |
-| `browserware-detect` | "What browsers are installed?" | Scaffold |
-| `browserware-profiles` | "What profiles exist for a browser?" | Scaffold |
+| `browserware-types` | Shared types (`Browser`, `Profile`, `BrowserContext`, selectors, etc.) | Active |
+| `browserware-detect` | "What browsers are installed?" | Active (macOS, Windows, Linux) |
+| `browserware-profiles` | "What profiles and contexts exist for a browser?" | Active (Chrome/Firefox profile discovery) |
 | `browserware-launch` | "Run this browser with these options" | Scaffold |
 | `browserware-rules` | "Which browser/profile for this URL?" | Scaffold |
 | `browserware-system` | "OS integration (default browser, etc.)" | Scaffold |
-| `browserware-cli` | User-facing CLI (`brw` binary) | Scaffold |
+| `browserware-cli` | User-facing CLI (`brw` binary) | Active (`browsers`, `contexts`), partial (`open`) |
 
 ## Data Flow
 
@@ -44,6 +44,15 @@ Example: `brw open https://example.com`
 4. detect::detect_browser("chrome") → Browser
 5. profiles::find_profile(family, "Work") → Profile
 6. launch::launch(executable, family, urls, options) → Result
+```
+
+Example: `brw contexts`
+
+```text
+1. CLI resolves output format and filters
+2. detect::detect_browsers() → installed browsers
+3. profiles::* discovery → browser contexts and selectors
+4. CLI renders contexts as table, plain text, or JSON
 ```
 
 ## Design Principles

@@ -18,7 +18,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -27,6 +26,7 @@ jobs:
   audit:
     name: Security Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
 
@@ -42,6 +42,7 @@ jobs:
   supply-chain:
     name: Supply Chain Security
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
 

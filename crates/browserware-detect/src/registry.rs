@@ -352,6 +352,28 @@ pub static KNOWN_BROWSERS: &[BrowserMeta] = &[
         linux_desktop_ids: &[],
     },
     // =========================================================================
+    // CHROMIUM FAMILY - Helium (macOS only)
+    // =========================================================================
+    BrowserMeta {
+        id: "helium",
+        name: "Helium",
+        variant: BrowserVariant::Single(BrowserFamily::Chromium),
+        macos_bundle_ids: &["net.imput.helium"],
+        windows_registry_keys: &[],
+        linux_desktop_ids: &[],
+    },
+    // =========================================================================
+    // CHROMIUM FAMILY - ChatGPT Atlas (macOS only)
+    // =========================================================================
+    BrowserMeta {
+        id: "atlas",
+        name: "ChatGPT Atlas",
+        variant: BrowserVariant::Single(BrowserFamily::Chromium),
+        macos_bundle_ids: &["com.openai.atlas"],
+        windows_registry_keys: &[],
+        linux_desktop_ids: &[],
+    },
+    // =========================================================================
     // WEBKIT FAMILY - GNOME Web (Linux only)
     // =========================================================================
     BrowserMeta {

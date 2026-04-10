@@ -15,6 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 browserware-detect = { workspace = true }
+browserware-profiles = { workspace = true }
 browserware-types = { workspace = true }
 clap = { workspace = true }
 serde = { workspace = true }
