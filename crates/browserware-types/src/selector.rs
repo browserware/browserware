@@ -222,13 +222,13 @@ impl ContextSelector {
 }
 
 fn decode_selector_value(value: &str) -> Result<String> {
-    let mut out = String::with_capacity(value.len());
+    let mut out: Vec<u8> = Vec::with_capacity(value.len());
     let bytes = value.as_bytes();
     let mut index = 0;
 
     while index < bytes.len() {
         if bytes[index] != b'%' {
-            out.push(bytes[index] as char);
+            out.push(bytes[index]);
             index += 1;
             continue;
         }
@@ -245,11 +245,15 @@ fn decode_selector_value(value: &str) -> Result<String> {
                 "invalid percent-encoding in selector value: {value:?}"
             ))
         })?;
-        out.push(decoded as char);
+        out.push(decoded);
         index += 3;
     }
 
-    Ok(out)
+    String::from_utf8(out).map_err(|_| {
+        Error::Other(format!(
+            "invalid UTF-8 in decoded selector value: {value:?}"
+        ))
+    })
 }
 
 /// Map a [`BrowserFamily`] to its canonical lowercase string without allocating.

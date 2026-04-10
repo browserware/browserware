@@ -125,6 +125,7 @@ dependencies = [
  "core-foundation",
  "home",
  "plist",
+ "tempfile",
  "tracing",
  "which",
  "windows-registry",

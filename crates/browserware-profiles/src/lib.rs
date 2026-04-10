@@ -118,7 +118,9 @@ fn chrome_user_data_dir(browser: &Browser) -> Option<PathBuf> {
 
     #[cfg(target_os = "windows")]
     {
-        let base = home_dir()?.join("AppData/Local");
+        let base = std::env::var_os("LOCALAPPDATA")
+            .map(PathBuf::from)
+            .or_else(|| home_dir().map(|h| h.join("AppData/Local")))?;
         let dir_name = match browser.id.0.as_str() {
             "chrome" => "Google/Chrome/User Data",
             "chrome-beta" => "Google/Chrome Beta/User Data",
@@ -177,7 +179,9 @@ fn firefox_profiles_ini(browser: &Browser) -> Option<PathBuf> {
 
     #[cfg(target_os = "windows")]
     {
-        let base = home_dir()?.join("AppData/Roaming");
+        let base = std::env::var_os("APPDATA")
+            .map(PathBuf::from)
+            .or_else(|| home_dir().map(|h| h.join("AppData/Roaming")))?;
         let file = match browser.id.0.as_str() {
             "firefox" | "firefox-beta" | "firefox-dev" | "firefox-nightly" | "firefox-esr" => {
                 "Mozilla/Firefox/profiles.ini"

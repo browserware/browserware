@@ -359,8 +359,9 @@ fn parse_exec_to_path(exec: &str) -> PathBuf {
                 }
             }
 
-            // Fallback: return flatpak command format that can be used for identification
-            return PathBuf::from(format!("flatpak run {app_id}"));
+            // Fallback: return the flatpak binary itself. The app_id is recorded
+            // in the browser registry entry; Browser.executable must be a real path.
+            return which::which("flatpak").unwrap_or_else(|_| PathBuf::from("flatpak"));
         }
     }
 
@@ -454,15 +455,14 @@ Exec=/usr/bin/firefox %u
 MimeType=x-scheme-handler/http;x-scheme-handler/https;
 ";
 
-        let temp_file = std::env::temp_dir().join("test.desktop");
+        let dir = tempfile::tempdir().unwrap();
+        let temp_file = dir.path().join("browser.desktop");
         std::fs::write(&temp_file, content).unwrap();
 
         let entry = parse_desktop_file(&temp_file).unwrap();
         assert_eq!(entry.name, "Firefox");
         assert_eq!(entry.exec, "/usr/bin/firefox %u");
         assert!(entry.is_http_handler);
-
-        std::fs::remove_file(temp_file).ok();
     }
 
     #[test]
@@ -473,13 +473,12 @@ Exec=/usr/bin/editor %f
 MimeType=text/plain;
 ";
 
-        let temp_file = std::env::temp_dir().join("test-editor.desktop");
+        let dir = tempfile::tempdir().unwrap();
+        let temp_file = dir.path().join("editor.desktop");
         std::fs::write(&temp_file, content).unwrap();
 
         let entry = parse_desktop_file(&temp_file).unwrap();
         assert!(!entry.is_http_handler);
-
-        std::fs::remove_file(temp_file).ok();
     }
 
     #[test]

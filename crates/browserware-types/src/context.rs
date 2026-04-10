@@ -148,14 +148,15 @@ mod tests {
     }
 
     #[test]
-    fn profile_ref_round_trip() {
+    fn profile_ref_round_trip() -> Result<(), serde_json::Error> {
         let profile = ProfileRef {
             id: "Profile 1".to_string(),
             display_name: "Work".to_string(),
         };
-        let json = serde_json::to_string(&profile).unwrap();
-        let parsed: ProfileRef = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&profile)?;
+        let parsed: ProfileRef = serde_json::from_str(&json)?;
         assert_eq!(profile, parsed);
+        Ok(())
     }
 
     #[test]
@@ -180,7 +181,7 @@ mod tests {
     }
 
     #[test]
-    fn launch_capability_round_trip() {
+    fn launch_capability_round_trip() -> Result<(), serde_json::Error> {
         let cap = LaunchCapability {
             discoverable: true,
             launchable: true,
@@ -188,9 +189,10 @@ mod tests {
             requires_user_config: true,
             limitations: vec!["needs config".to_string(), "no profiles".to_string()],
         };
-        let json = serde_json::to_string(&cap).unwrap();
-        let parsed: LaunchCapability = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&cap)?;
+        let parsed: LaunchCapability = serde_json::from_str(&json)?;
         assert_eq!(cap, parsed);
+        Ok(())
     }
 
     #[test]
@@ -226,23 +228,25 @@ mod tests {
     }
 
     #[test]
-    fn browser_context_round_trip() {
+    fn browser_context_round_trip() -> Result<(), serde_json::Error> {
         let profile = ProfileRef {
             id: "Default".to_string(),
             display_name: "Default".to_string(),
         };
         let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
-        let json = serde_json::to_string(&ctx).unwrap();
-        let parsed: BrowserContext = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&ctx)?;
+        let parsed: BrowserContext = serde_json::from_str(&json)?;
         assert_eq!(ctx, parsed);
+        Ok(())
     }
 
     #[test]
-    fn browser_context_with_limitations_round_trip() {
+    fn browser_context_with_limitations_round_trip() -> Result<(), serde_json::Error> {
         let cap = LaunchCapability::launch_only("Safari does not support profile flags");
         let ctx = BrowserContext::new(safari_browser(), None, cap);
-        let json = serde_json::to_string(&ctx).unwrap();
-        let parsed: BrowserContext = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&ctx)?;
+        let parsed: BrowserContext = serde_json::from_str(&json)?;
         assert_eq!(ctx, parsed);
+        Ok(())
     }
 }

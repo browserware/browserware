@@ -7,6 +7,7 @@ use browserware_detect::{detect_browsers, detect_default_browser};
 use std::time::Instant;
 
 #[test]
+#[ignore = "run explicitly with: cargo test --test performance --release -- --ignored --nocapture"]
 fn detect_browsers_performance() {
     // Warm up (first run may involve OS caching)
     let _ = detect_browsers();
@@ -50,6 +51,7 @@ fn detect_browsers_performance() {
 }
 
 #[test]
+#[ignore = "run explicitly with: cargo test --test performance --release -- --ignored --nocapture"]
 fn detect_default_browser_performance() {
     // Warm up
     let _ = detect_default_browser();
@@ -85,6 +87,7 @@ fn detect_default_browser_performance() {
 }
 
 #[test]
+#[ignore = "run explicitly with: cargo test --test performance --release -- --ignored --nocapture"]
 fn multiple_detection_calls_performance() {
     // Test that repeated calls maintain performance (no resource leaks)
     const ITERATIONS: usize = 10;

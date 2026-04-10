@@ -188,18 +188,15 @@ fn parse_command_to_executable(command: &str) -> Option<PathBuf> {
         return None;
     }
 
-    // For unquoted paths, try to find the .exe file by incrementally checking path existence
+    // For unquoted paths, find the .exe boundary syntactically without filesystem access.
     // This handles paths like "C:\Program Files\Mozilla Firefox\firefox.exe -osint -url %1"
     let parts: Vec<&str> = command.split_whitespace().collect();
 
-    // Try progressively longer paths until we find one that exists and ends with .exe
+    // Try progressively longer paths until we find one that ends with .exe
     for i in 1..=parts.len() {
         let potential_path = parts[..i].join(" ");
-        if potential_path.to_lowercase().ends_with(".exe") {
-            let path = PathBuf::from(&potential_path);
-            if path.exists() {
-                return Some(path);
-            }
+        if potential_path.to_ascii_lowercase().ends_with(".exe") {
+            return Some(PathBuf::from(potential_path));
         }
     }
 

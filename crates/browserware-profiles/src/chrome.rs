@@ -105,24 +105,28 @@ mod tests {
     }
 
     #[test]
-    fn chrome_missing_data_dir_returns_limitation() {
-        let d = discover_chrome_profiles_from(std::path::Path::new("/nonexistent/chrome/dir"));
+    fn chrome_missing_data_dir_returns_limitation() -> Result<(), Box<dyn std::error::Error>> {
+        let base = tempfile::tempdir()?;
+        let missing = base.path().join("nonexistent");
+        let d = discover_chrome_profiles_from(&missing);
         assert!(!d.capability.profile_launchable);
         assert!(d.profiles.is_empty());
         assert!(!d.capability.limitations.is_empty());
+        Ok(())
     }
 
     #[test]
-    fn chrome_malformed_json_returns_limitation() {
-        let dir = tempfile::tempdir().unwrap();
+    fn chrome_malformed_json_returns_limitation() -> Result<(), Box<dyn std::error::Error>> {
+        let dir = tempfile::tempdir()?;
         let local_state = dir.path().join("Local State");
-        let mut f = std::fs::File::create(&local_state).unwrap();
-        f.write_all(b"not json").unwrap();
+        let mut f = std::fs::File::create(&local_state)?;
+        f.write_all(b"not json")?;
         drop(f);
 
         let d = discover_chrome_profiles_from(dir.path());
         assert!(!d.capability.profile_launchable);
         assert!(d.profiles.is_empty());
         assert!(!d.capability.limitations.is_empty());
+        Ok(())
     }
 }
