@@ -158,3 +158,117 @@ fn open_subcommand_exists() {
         .assert()
         .success();
 }
+
+// ─── brw contexts ────────────────────────────────────────────────────────────
+
+#[test]
+fn contexts_subcommand_exists() {
+    brw().arg("contexts").assert().success();
+}
+
+#[test]
+fn contexts_table_has_headers() {
+    let output = brw().arg("contexts").assert().success();
+    // Either headers + count OR the empty message
+    output.stdout(
+        predicate::str::contains("SELECTOR")
+            .and(predicate::str::contains("BROWSER"))
+            .and(predicate::str::contains("PROFILE"))
+            .and(predicate::str::contains("LAUNCH"))
+            .and(predicate::str::contains("context(s) detected"))
+            .or(predicate::str::contains("No browser contexts detected.")),
+    );
+}
+
+#[test]
+fn contexts_json_is_valid() {
+    use serde_json::Value;
+
+    let output = brw()
+        .args(["contexts", "--format", "json"])
+        .output()
+        .expect("Failed to run command");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let parsed: Result<Value, _> = serde_json::from_str(&stdout);
+    assert!(
+        parsed.is_ok(),
+        "contexts JSON output should be valid: {:?}\nstdout: {stdout}",
+        parsed.err()
+    );
+
+    let json = parsed.unwrap();
+    assert!(json["contexts"].is_array(), "contexts should be an array");
+    assert!(json["count"].is_number(), "count should be a number");
+}
+
+#[test]
+fn contexts_json_fields_present_when_contexts_exist() {
+    use serde_json::Value;
+
+    let output = brw()
+        .args(["contexts", "--format", "json"])
+        .output()
+        .expect("Failed to run command");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: Value = serde_json::from_str(&stdout).unwrap();
+
+    let contexts = json["contexts"].as_array().unwrap();
+    if contexts.is_empty() {
+        // No browsers detected in this CI environment — skip field check
+        return;
+    }
+
+    let ctx = &contexts[0];
+    assert!(ctx["browser"].is_object(), "missing browser field");
+    assert!(ctx["selector"].is_string(), "missing selector field");
+    assert!(ctx["capability"].is_object(), "missing capability field");
+    let cap = &ctx["capability"];
+    assert!(cap["discoverable"].is_boolean());
+    assert!(cap["launchable"].is_boolean());
+    assert!(cap["profile_launchable"].is_boolean());
+    assert!(cap["requires_user_config"].is_boolean());
+    assert!(cap["limitations"].is_array());
+}
+
+#[test]
+fn contexts_plain_format_no_table_headers() {
+    brw()
+        .args(["contexts", "--format", "plain"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("SELECTOR").not())
+        .stdout(predicate::str::contains("BROWSER").not());
+}
+
+#[test]
+fn contexts_plain_format_selectors_are_stable() {
+    // Plain format should output canonical selector strings (key=value pairs)
+    // If any contexts are present, each line should look like a selector
+    let output = brw()
+        .args(["contexts", "--format", "plain"])
+        .output()
+        .expect("Failed to run command");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    for line in stdout.lines() {
+        let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+        assert!(
+            line.contains("family=") && line.contains("browser="),
+            "plain output line is not a canonical selector: {line:?}"
+        );
+    }
+}
+
+#[test]
+fn contexts_global_format_flag() {
+    brw()
+        .args(["--format", "json", "contexts"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"contexts\":"));
+}
