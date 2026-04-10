@@ -1,5 +1,8 @@
 //! brw - Smart browser routing CLI
 
+pub(crate) mod commands;
+pub(crate) mod output;
+
 use clap::{Parser, Subcommand};
 
 use browserware_detect::{Browser, BrowserFamily, detect_browsers, detect_default_browser};
@@ -61,6 +64,8 @@ enum Commands {
     Register,
     /// Unregister as default browser
     Unregister,
+    /// List browser contexts (browser + profile combinations)
+    Contexts,
 }
 
 #[derive(Subcommand)]
@@ -118,6 +123,9 @@ fn main() {
         }
         Commands::Unregister => {
             println!("Unregister not yet implemented (Milestone 5)");
+        }
+        Commands::Contexts => {
+            commands::contexts::run(cli.format);
         }
     }
 }
