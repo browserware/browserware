@@ -67,12 +67,18 @@ pub struct BrowserContext {
     /// The targeted profile, if any.
     pub profile: Option<ProfileRef>,
     /// Selector string, e.g. `"family=chromium,browser=chrome,profile=Profile 1"`.
-    pub selector: String,
+    selector: String,
     /// Capability flags for this context.
     pub capability: LaunchCapability,
 }
 
 impl BrowserContext {
+    /// Returns the canonical selector for this context.
+    #[must_use]
+    pub fn selector(&self) -> &str {
+        &self.selector
+    }
+
     /// Create a new `BrowserContext`, computing the selector automatically.
     ///
     /// The selector is `family=<family>,browser=<id>` optionally followed by
@@ -92,6 +98,8 @@ impl BrowserContext {
 /// Build the selector string from browser and optional profile.
 fn build_selector(browser: &Browser, profile: Option<&ProfileRef>) -> String {
     let base = format!("family={},browser={}", browser.family(), browser.id);
+    // NOTE: profile IDs containing ',' or '=' produce selectors that cannot be
+    // unambiguously parsed back. ContextSelector (Task 2) handles escaping policy.
     match profile {
         Some(p) => format!("{base},profile={}", p.id),
         None => base,
@@ -168,13 +176,13 @@ mod tests {
             display_name: "Work".to_string(),
         };
         let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
-        assert_eq!(ctx.selector, "family=chromium,browser=chrome,profile=Profile 1");
+        assert_eq!(ctx.selector(), "family=chromium,browser=chrome,profile=Profile 1");
     }
 
     #[test]
     fn browser_context_selector_no_profile() {
         let ctx = BrowserContext::new(chrome_browser(), None, LaunchCapability::full());
-        assert_eq!(ctx.selector, "family=chromium,browser=chrome");
+        assert_eq!(ctx.selector(), "family=chromium,browser=chrome");
     }
 
     #[test]
