@@ -17,6 +17,23 @@ pub use chrome::discover_chrome_profiles_from;
 pub use firefox::discover_firefox_profiles_from;
 
 /// The result of profile discovery for a single browser.
+///
+/// An empty `profiles` vec combined with a `launch_only` capability means the
+/// browser was found but its profile metadata was inaccessible; the browser
+/// can still be launched without a specific profile.
+///
+/// # Examples
+///
+/// ```no_run
+/// use browserware_profiles::discover_profiles;
+/// use browserware_types::{Browser, BrowserVariant, ChromiumChannel};
+/// use std::path::PathBuf;
+///
+/// let browser = Browser::new("chrome", "Google Chrome", PathBuf::from("/usr/bin/google-chrome"))
+///     .with_variant(BrowserVariant::Chromium(ChromiumChannel::Stable));
+/// let discovery = discover_profiles(&browser);
+/// println!("found {} profile(s), launchable: {}", discovery.profiles.len(), discovery.capability.profile_launchable);
+/// ```
 #[derive(Debug, Clone)]
 pub struct ProfileDiscovery {
     /// Discovered profiles. Empty when the browser has no profile support or
@@ -29,8 +46,30 @@ pub struct ProfileDiscovery {
 /// Discover profiles for the given browser.
 ///
 /// Dispatches to the correct discovery backend based on the browser's variant,
-/// using platform-specific data directory paths. Returns a [`ProfileDiscovery`]
-/// with all found profiles and capability flags.
+/// using platform-specific data directory paths.
+///
+/// # Returns
+///
+/// A [`ProfileDiscovery`] whose `profiles` field contains all discovered
+/// profiles (sorted with the default profile first) and whose `capability`
+/// field reflects whether profile-targeted launch is supported. Returns an
+/// empty `profiles` vec with a `launch_only` capability when the browser
+/// family is unsupported or the profile metadata cannot be located.
+///
+/// # Examples
+///
+/// ```no_run
+/// use browserware_profiles::discover_profiles;
+/// use browserware_types::{Browser, BrowserVariant, ChromiumChannel};
+/// use std::path::PathBuf;
+///
+/// let browser = Browser::new("chrome", "Google Chrome", PathBuf::from("/usr/bin/google-chrome"))
+///     .with_variant(BrowserVariant::Chromium(ChromiumChannel::Stable));
+/// let discovery = discover_profiles(&browser);
+/// for profile in &discovery.profiles {
+///     println!("{}: {}", profile.id, profile.display_name);
+/// }
+/// ```
 #[must_use]
 pub fn discover_profiles(browser: &Browser) -> ProfileDiscovery {
     match browser.variant {

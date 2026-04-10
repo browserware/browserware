@@ -12,6 +12,18 @@ use crate::ProfileDiscovery;
 /// Returns a [`ProfileDiscovery`] with all found profiles and the derived
 /// capability. When the file is missing or unreadable, a `launch_only`
 /// capability is returned with an explanation in `limitations`.
+///
+/// # Examples
+///
+/// ```no_run
+/// use std::path::Path;
+/// use browserware_profiles::discover_chrome_profiles_from;
+///
+/// let discovery = discover_chrome_profiles_from(Path::new("/path/to/chrome-user-data"));
+/// // `profiles` is empty when the directory does not exist or metadata is unreadable.
+/// println!("found {} profile(s)", discovery.profiles.len());
+/// println!("profile launchable: {}", discovery.capability.profile_launchable);
+/// ```
 #[must_use]
 pub fn discover_chrome_profiles_from(data_dir: &std::path::Path) -> ProfileDiscovery {
     let path = data_dir.join("Local State");

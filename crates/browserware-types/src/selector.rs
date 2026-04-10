@@ -9,6 +9,30 @@ use serde::{Deserialize, Serialize};
 use crate::{BrowserContext, BrowserFamily, Error, Result};
 
 /// Policy for handling the case where a selector matches multiple contexts.
+///
+/// Pass this to [`ContextSelector::select`] to control what happens when more
+/// than one installed browser context satisfies the selector.
+///
+/// # Behavior
+///
+/// | Variant | Multiple matches |
+/// |---------|-----------------|
+/// | [`First`](AmbiguityPolicy::First) | Return the first match silently |
+/// | [`Warn`](AmbiguityPolicy::Warn)   | Return the first match and emit a [`tracing::warn!`] log |
+/// | [`Error`](AmbiguityPolicy::Error) | Return [`Err`] |
+///
+/// # Examples
+///
+/// ```
+/// use browserware_types::selector::AmbiguityPolicy;
+///
+/// // `First` is the default — callers that do not care about duplicates use it.
+/// assert_eq!(AmbiguityPolicy::default(), AmbiguityPolicy::First);
+///
+/// // `Error` surfaces ambiguity so callers can prompt users to be more specific.
+/// let policy = AmbiguityPolicy::Error;
+/// assert_ne!(policy, AmbiguityPolicy::First);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum AmbiguityPolicy {
