@@ -107,6 +107,7 @@ dependencies = [
  "anyhow",
  "assert_cmd",
  "browserware-detect",
+ "browserware-profiles",
  "browserware-types",
  "clap",
  "predicates",
