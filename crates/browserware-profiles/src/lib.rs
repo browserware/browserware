@@ -1,14 +1,16 @@
 //! Browser profile management for the browserware ecosystem.
 //!
-//! This crate provides profile discovery for Chrome-family browsers.
+//! This crate provides profile discovery for Chrome-family and Firefox browsers.
 //! Additional browser families will be added in future milestones.
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
 mod chrome;
+mod firefox;
 
 pub use chrome::discover_chrome_profiles_from;
+pub use firefox::discover_firefox_profiles_from;
 
 /// The result of profile discovery for a single browser.
 #[derive(Debug, Clone)]

@@ -23,3 +23,36 @@ fn chrome_inaccessible_returns_limitation() {
     assert!(d.profiles.is_empty());
     assert!(!d.capability.limitations.is_empty());
 }
+
+#[test]
+fn firefox_multi_profiles_integration() {
+    let d = browserware_profiles::discover_firefox_profiles_from(
+        &PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/firefox_multi/profiles.ini"),
+    );
+    assert!(d.capability.profile_launchable);
+    assert_eq!(d.profiles.len(), 2);
+    let ids: Vec<&str> = d.profiles.iter().map(|p| p.id.as_str()).collect();
+    assert!(ids.contains(&"default-release"));
+    assert!(ids.contains(&"work"));
+}
+
+#[test]
+fn firefox_default_only_integration() {
+    let d = browserware_profiles::discover_firefox_profiles_from(
+        &PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/firefox_default/profiles.ini"),
+    );
+    assert!(d.capability.profile_launchable);
+    assert_eq!(d.profiles.len(), 1);
+    assert_eq!(d.profiles[0].id, "default");
+}
+
+#[test]
+fn firefox_missing_ini_returns_limitation() {
+    let d = browserware_profiles::discover_firefox_profiles_from(
+        &PathBuf::from("/nonexistent/firefox/profiles.ini"),
+    );
+    assert!(!d.capability.profile_launchable);
+    assert!(d.profiles.is_empty());
+}
