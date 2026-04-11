@@ -152,7 +152,11 @@ mod tests {
         drop(f);
 
         let d = discover_firefox_profiles_from(&ini_path);
-        assert_eq!(d.profiles.len(), 1, "only the non-empty profile should appear");
+        assert_eq!(
+            d.profiles.len(),
+            1,
+            "only the non-empty profile should appear"
+        );
         assert_eq!(d.profiles[0].id, "default-release");
         Ok(())
     }

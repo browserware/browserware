@@ -63,10 +63,11 @@ impl LaunchCapability {
 
 /// Combines browser, optional profile, selector string, and capability flags.
 ///
-/// The `selector` field is always derived from `browser` and `profile`; it is
-/// never read from serialized input (annotated `#[serde(skip)]`) to prevent a
-/// deserialized context from carrying a stale selector that does not match its
-/// `browser`/`profile` fields.
+/// The `selector` field is always derived from `browser` and `profile`. A
+/// custom [`Deserialize`] implementation recomputes `selector` from those two
+/// fields on deserialization and ignores any serialized `selector` value, so a
+/// context round-tripped through JSON (or any other format) can never carry a
+/// stale selector that does not match its `browser`/`profile` fields.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct BrowserContext {
     /// The underlying browser.
@@ -75,8 +76,8 @@ pub struct BrowserContext {
     pub profile: Option<ProfileRef>,
     /// Selector string, e.g. `"family=chromium,browser=chrome,profile=Profile 1"`.
     ///
-    /// Always computed from `browser` and `profile`; never read from serialized
-    /// input.
+    /// Always recomputed from `browser` and `profile` during deserialization;
+    /// the serialized value is accepted but discarded.
     selector: String,
     /// Capability flags for this context.
     pub capability: LaunchCapability,
@@ -84,10 +85,17 @@ pub struct BrowserContext {
 
 impl<'de> Deserialize<'de> for BrowserContext {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        // `selector` is included here so that sequence-based (non-self-describing)
+        // formats such as bincode/postcard can read the field in the correct
+        // position without a layout mismatch. Its value is discarded; `selector`
+        // is always recomputed from `browser` and `profile`.
         #[derive(Deserialize)]
         struct Raw {
             browser: Browser,
             profile: Option<ProfileRef>,
+            #[serde(default)]
+            #[allow(dead_code)]
+            selector: String,
             capability: LaunchCapability,
         }
         let raw = Raw::deserialize(deserializer)?;
