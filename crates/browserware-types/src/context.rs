@@ -94,8 +94,7 @@ impl<'de> Deserialize<'de> for BrowserContext {
             browser: Browser,
             profile: Option<ProfileRef>,
             #[serde(default)]
-            #[allow(dead_code)]
-            selector: String,
+            _selector: String,
             capability: LaunchCapability,
         }
         let raw = Raw::deserialize(deserializer)?;
