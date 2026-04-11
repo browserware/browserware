@@ -144,8 +144,7 @@ fn chrome_user_data_dir(browser: &Browser) -> Option<PathBuf> {
         let dir_name = match browser.id.0.as_str() {
             "chrome" => "google-chrome",
             "chrome-beta" => "google-chrome-beta",
-            "chrome-dev" => "google-chrome-unstable",
-            "chrome-canary" => "google-chrome-unstable",
+            "chrome-dev" | "chrome-canary" => "google-chrome-unstable",
             "edge" => "microsoft-edge",
             "edge-beta" => "microsoft-edge-beta",
             "edge-dev" => "microsoft-edge-dev",
