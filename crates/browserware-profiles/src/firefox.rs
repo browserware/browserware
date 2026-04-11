@@ -60,7 +60,10 @@ fn parse_profiles_ini(contents: &str) -> ProfileDiscovery {
                 in_profile_section = false;
             }
         } else if in_profile_section && let Some(value) = line.strip_prefix("Name=") {
-            current_name = Some(value.trim().to_string());
+            let name = value.trim();
+            if !name.is_empty() {
+                current_name = Some(name.to_string());
+            }
         }
     }
 
@@ -134,6 +137,28 @@ mod tests {
         let d = discover_firefox_profiles_from(&ini_path);
         assert!(!d.capability.profile_launchable);
         assert!(d.profiles.is_empty());
+    }
+
+    #[test]
+    fn firefox_empty_name_value_skipped() -> Result<(), Box<dyn std::error::Error>> {
+        let dir = tempfile::tempdir()?;
+        let ini_path = dir.path().join("profiles.ini");
+        let mut f = std::fs::File::create(&ini_path)?;
+        // Name= with no value (and whitespace-only variant) must not produce a profile
+        // with an empty id; a valid profile follows to confirm the parser keeps running.
+        f.write_all(
+            b"[Profile0]\nName=\n[Profile1]\nName=   \n[Profile2]\nName=default-release\n",
+        )?;
+        drop(f);
+
+        let d = discover_firefox_profiles_from(&ini_path);
+        assert_eq!(
+            d.profiles.len(),
+            1,
+            "only the non-empty profile should appear"
+        );
+        assert_eq!(d.profiles[0].id, "default-release");
+        Ok(())
     }
 
     #[test]

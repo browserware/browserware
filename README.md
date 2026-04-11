@@ -4,8 +4,10 @@ A modular ecosystem for intelligent browser routing across macOS, Windows, and L
 
 ## Installation
 
+> **Note:** Not yet published to crates.io. Install directly from the repository:
+
 ```bash
-cargo install browserware-cli
+cargo install --git https://github.com/browserware/browserware browserware-cli
 ```
 
 ## Development Tooling

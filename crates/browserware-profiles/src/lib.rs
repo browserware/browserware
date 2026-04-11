@@ -142,8 +142,9 @@ fn chrome_user_data_dir(browser: &Browser) -> Option<PathBuf> {
     {
         let base = home_dir()?.join(".config");
         let dir_name = match browser.id.0.as_str() {
-            "chrome" | "chrome-beta" | "chrome-dev" => "google-chrome",
-            "chrome-canary" => "google-chrome-unstable",
+            "chrome" => "google-chrome",
+            "chrome-beta" => "google-chrome-beta",
+            "chrome-dev" | "chrome-canary" => "google-chrome-unstable",
             "edge" => "microsoft-edge",
             "edge-beta" => "microsoft-edge-beta",
             "edge-dev" => "microsoft-edge-dev",
@@ -203,17 +204,17 @@ fn firefox_profiles_ini(browser: &Browser) -> Option<PathBuf> {
 
     #[cfg(target_os = "linux")]
     {
-        let base = home_dir()?.join(".mozilla");
-        let file = match browser.id.0.as_str() {
+        let home = home_dir()?;
+        let path = match browser.id.0.as_str() {
             "firefox" | "firefox-beta" | "firefox-dev" | "firefox-nightly" | "firefox-esr" => {
-                "firefox/profiles.ini"
+                home.join(".mozilla/firefox/profiles.ini")
             }
-            "librewolf" => "librewolf/profiles.ini",
-            "waterfox" => "waterfox/profiles.ini",
-            "floorp" => "floorp/profiles.ini",
+            "librewolf" => home.join(".librewolf/profiles.ini"),
+            "waterfox" => home.join(".waterfox/profiles.ini"),
+            "floorp" => home.join(".floorp/profiles.ini"),
             _ => return None,
         };
-        Some(base.join(file))
+        Some(path)
     }
 
     #[cfg(target_os = "windows")]
@@ -225,8 +226,9 @@ fn firefox_profiles_ini(browser: &Browser) -> Option<PathBuf> {
             "firefox" | "firefox-beta" | "firefox-dev" | "firefox-nightly" | "firefox-esr" => {
                 "Mozilla/Firefox/profiles.ini"
             }
-            "librewolf" => "librewolf/librewolf/profiles.ini",
+            "librewolf" => "librewolf/profiles.ini",
             "waterfox" => "Waterfox/profiles.ini",
+            "floorp" => "Floorp/profiles.ini",
             _ => return None,
         };
         Some(base.join(file))

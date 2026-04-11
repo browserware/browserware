@@ -62,16 +62,80 @@ impl LaunchCapability {
 }
 
 /// Combines browser, optional profile, selector string, and capability flags.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+///
+/// The `selector` field is always derived from `browser` and `profile`. A
+/// custom [`Deserialize`] implementation recomputes `selector` from those two
+/// fields on deserialization and ignores any serialized `selector` value, so a
+/// context round-tripped through JSON (or any other format) can never carry a
+/// stale selector that does not match its `browser`/`profile` fields.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::PathBuf;
+/// use browserware_types::{
+///     Browser, BrowserContext, BrowserVariant, ChromiumChannel, LaunchCapability, ProfileRef,
+/// };
+///
+/// let browser = Browser::new("chrome", "Google Chrome", PathBuf::from("/usr/bin/chrome"))
+///     .with_variant(BrowserVariant::Chromium(ChromiumChannel::Stable));
+/// let profile = ProfileRef {
+///     id: "Profile 1".to_string(),
+///     display_name: "Work".to_string(),
+/// };
+/// let ctx = BrowserContext::new(browser, Some(profile), LaunchCapability::full());
+///
+/// // The selector is computed from browser + profile at construction time.
+/// assert_eq!(ctx.selector(), "family=chromium,browser=chrome,profile=Profile 1");
+///
+/// // Serializing to JSON includes the selector field.
+/// let mut json: serde_json::Value = serde_json::to_value(&ctx).unwrap();
+///
+/// // Tampering with the serialized selector has no effect: deserialization
+/// // always recomputes it from `browser` and `profile`.
+/// json["selector"] = serde_json::json!("stale-selector");
+/// let parsed: BrowserContext = serde_json::from_value(json).unwrap();
+/// assert_eq!(parsed.selector(), "family=chromium,browser=chrome,profile=Profile 1");
+/// assert_eq!(parsed, ctx);
+/// ```
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct BrowserContext {
     /// The underlying browser.
     pub browser: Browser,
     /// The targeted profile, if any.
     pub profile: Option<ProfileRef>,
     /// Selector string, e.g. `"family=chromium,browser=chrome,profile=Profile 1"`.
+    ///
+    /// Always recomputed from `browser` and `profile` during deserialization;
+    /// the serialized value is accepted but discarded.
     selector: String,
     /// Capability flags for this context.
     pub capability: LaunchCapability,
+}
+
+impl<'de> Deserialize<'de> for BrowserContext {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        // `selector` is included here so that sequence-based (non-self-describing)
+        // formats such as bincode/postcard can read the field in the correct
+        // position without a layout mismatch. Its value is discarded; `selector`
+        // is always recomputed from `browser` and `profile`.
+        #[derive(Deserialize)]
+        struct Raw {
+            browser: Browser,
+            profile: Option<ProfileRef>,
+            #[serde(default)]
+            _selector: String,
+            capability: LaunchCapability,
+        }
+        let raw = Raw::deserialize(deserializer)?;
+        let selector = build_selector(&raw.browser, raw.profile.as_ref());
+        Ok(Self {
+            browser: raw.browser,
+            profile: raw.profile,
+            selector,
+            capability: raw.capability,
+        })
+    }
 }
 
 impl BrowserContext {
@@ -251,6 +315,43 @@ mod tests {
         let json = serde_json::to_string(&ctx)?;
         let parsed: BrowserContext = serde_json::from_str(&json)?;
         assert_eq!(ctx, parsed);
+        Ok(())
+    }
+
+    #[test]
+    fn browser_context_deserialize_recomputes_selector() -> Result<(), serde_json::Error> {
+        // A BrowserContext deserialized from JSON with a stale or missing `selector`
+        // field must have its selector recomputed from `browser` + `profile`, not
+        // read from the JSON. This upholds the invariant that selector is always
+        // derived from its components.
+        let profile = ProfileRef {
+            id: "Profile 1".to_string(),
+            display_name: "Work".to_string(),
+        };
+        let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
+
+        // Case 1: stale selector in JSON must be discarded.
+        let mut value: serde_json::Value = serde_json::to_value(&ctx)?;
+        value["selector"] = serde_json::json!("stale-selector-value");
+        let parsed: BrowserContext = serde_json::from_str(&serde_json::to_string(&value)?)?;
+        assert_eq!(
+            parsed.selector(),
+            "family=chromium,browser=chrome,profile=Profile 1",
+            "selector must be recomputed from browser+profile, not read from JSON"
+        );
+        assert_eq!(parsed, ctx);
+
+        // Case 2: selector key entirely absent must also trigger recomputation.
+        let mut value: serde_json::Value = serde_json::to_value(&ctx)?;
+        value.as_object_mut().and_then(|m| m.remove("selector"));
+        let parsed: BrowserContext = serde_json::from_str(&serde_json::to_string(&value)?)?;
+        assert_eq!(
+            parsed.selector(),
+            "family=chromium,browser=chrome,profile=Profile 1",
+            "selector must be recomputed when the key is absent from JSON"
+        );
+        assert_eq!(parsed, ctx);
+
         Ok(())
     }
 }
