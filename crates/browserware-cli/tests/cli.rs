@@ -169,6 +169,49 @@ fn open_without_context_fails_with_hint() {
         .stderr(predicate::str::contains("--context"));
 }
 
+/// A selector with an unknown canonical key must fail at parse time.
+#[test]
+fn open_bad_selector_parse_error_exit_nonzero() {
+    brw()
+        .args(["open", "--context", "badkey=value", "https://example.com"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("invalid context selector"));
+}
+
+/// A syntactically valid selector that matches no installed context must fail
+/// with "no context matches", even in --dry-run mode.
+#[test]
+fn open_nonexistent_context_exit_nonzero() {
+    brw()
+        .args([
+            "open",
+            "--context",
+            "notarealbrwr123:noprofile",
+            "https://example.com",
+        ])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("no context matches"));
+}
+
+/// --dry-run with a selector that matches nothing still exits non-zero.
+/// The success path (prints command) is covered by open_context unit tests.
+#[test]
+fn open_dry_run_nonexistent_context_exit_nonzero() {
+    brw()
+        .args([
+            "open",
+            "--dry-run",
+            "--context",
+            "notarealbrwr123:noprofile",
+            "https://example.com",
+        ])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("no context matches"));
+}
+
 // ─── brw contexts ────────────────────────────────────────────────────────────
 
 #[test]

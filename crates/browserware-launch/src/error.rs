@@ -26,4 +26,12 @@ pub enum LaunchError {
     /// Browser exited with a non-zero status.
     #[error("browser process exited with status {0}")]
     ProcessFailed(ExitStatus),
+    /// Firefox profile launch requires an absolute path from `profiles.ini`,
+    /// but this profile has no `Path=` entry — silently falling through to the
+    /// default profile would open the wrong profile.
+    #[error("Firefox profile '{profile_id}' has no resolved path in profiles.ini")]
+    FirefoxProfilePathMissing {
+        /// The internal profile ID (the INI section name, e.g. `"default-release"`).
+        profile_id: String,
+    },
 }

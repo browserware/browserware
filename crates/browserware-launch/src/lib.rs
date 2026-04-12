@@ -5,10 +5,11 @@
 //! invocation (multiple tabs when the browser supports it).
 //!
 //! On macOS, when [`browserware_types::Browser::bundle_id`] is set, this crate uses
-//! `open -b <bundle_id> <urls>... --args <profile flags>`. Profile flags are passed
-//! after `--args` so URLs stay in the `open` position list. Some macOS builds have
-//! been observed to drop or mishandle `--args`; use CLI `--dry-run` to inspect the
-//! command before launching.
+//! `open -b <bundle_id> <urls>...` for URL-only (no-profile) opens — this avoids
+//! Gatekeeper friction. For profile-targeted Chromium launches the direct executable
+//! is used instead, because `open -b --args` silently drops `--args` when the app is
+//! already running (macOS forwards the URL via Apple Events and strips launch flags).
+//! Use CLI `--dry-run` to inspect the generated command before launching.
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
@@ -23,13 +24,58 @@ use std::process::Command;
 use browserware_types::{BrowserContext, BrowserFamily};
 use url::Url;
 
-/// Format a [`Command`] as a single shell-style string (for `--dry-run` and logging).
+/// Quote a single command token for POSIX-shell display.
+///
+/// Tokens that contain no shell-special characters are returned as-is.
+/// Others are wrapped in double quotes with `\`, `"`, `$`, and `` ` ``
+/// escaped so the output copy-pastes correctly in a shell.
+fn shell_quote(s: &str) -> String {
+    let needs_quoting = s.is_empty()
+        || s.chars().any(|c| {
+            matches!(
+                c,
+                ' ' | '\t'
+                    | '\n'
+                    | '"'
+                    | '\''
+                    | '$'
+                    | '`'
+                    | '\\'
+                    | '!'
+                    | '&'
+                    | '|'
+                    | ';'
+                    | '('
+                    | ')'
+                    | '<'
+                    | '>'
+            )
+        });
+    if !needs_quoting {
+        return s.to_string();
+    }
+    let mut out = String::with_capacity(s.len() + 2);
+    out.push('"');
+    for c in s.chars() {
+        if matches!(c, '"' | '\\' | '$' | '`') {
+            out.push('\\');
+        }
+        out.push(c);
+    }
+    out.push('"');
+    out
+}
+
+/// Format a [`Command`] as a single shell-safe string (for `--dry-run` and logging).
+///
+/// Each argument is quoted if it contains spaces or shell-special characters,
+/// so the output can be copy-pasted into a POSIX shell without misinterpretation.
 #[must_use]
 pub fn format_command(cmd: &Command) -> String {
     let mut parts: Vec<String> = Vec::new();
-    parts.push(cmd.get_program().to_string_lossy().into_owned());
+    parts.push(shell_quote(&cmd.get_program().to_string_lossy()));
     for a in cmd.get_args() {
-        parts.push(a.to_string_lossy().into_owned());
+        parts.push(shell_quote(&a.to_string_lossy()));
     }
     parts.join(" ")
 }
@@ -51,6 +97,17 @@ pub fn build_command(context: &BrowserContext, urls: &[Url]) -> Result<Command, 
         return Err(LaunchError::NotLaunchable {
             limitations: context.capability.limitations.clone(),
         });
+    }
+
+    // Firefox profile launches require an absolute path from profiles.ini.
+    // When path is None, proceeding would silently open the default profile
+    // instead of the one the user asked for.
+    if context.browser.family() == BrowserFamily::Firefox
+        && context.capability.profile_launchable
+        && context.profile.as_ref().is_some_and(|p| p.path.is_none())
+    {
+        let profile_id = context.profile.as_ref().unwrap().id.clone();
+        return Err(LaunchError::FirefoxProfilePathMissing { profile_id });
     }
 
     #[cfg(target_os = "macos")]
@@ -236,27 +293,28 @@ mod tests {
         );
     }
 
-    #[cfg(unix)]
+    /// Firefox + profile set + path None → must error, not silently open default profile.
     #[test]
-    fn firefox_no_profile_args() {
+    fn firefox_pathless_profile_returns_error() {
         let executable = PathBuf::from("/bin/sh");
         let browser = Browser::new("firefox", "Firefox", executable)
             .with_variant(BrowserVariant::Firefox(FirefoxChannel::Stable));
         let ctx = BrowserContext::new(
             browser,
             Some(ProfileRef {
-                id: "rel".into(),
-                display_name: "rel".into(),
+                id: "default-release".into(),
+                display_name: "default-release".into(),
                 path: None,
             }),
             LaunchCapability::full(),
         );
-        let cmd = build_command(&ctx, &[example_url()]).unwrap();
-        let args = cmd
-            .get_args()
-            .map(|a| a.to_string_lossy().to_string())
-            .collect::<Vec<_>>();
-        assert_eq!(args, vec![example_url_str()]);
+        let err = build_command(&ctx, &[example_url()]).unwrap_err();
+        match err {
+            LaunchError::FirefoxProfilePathMissing { profile_id } => {
+                assert_eq!(profile_id, "default-release");
+            }
+            e => panic!("expected FirefoxProfilePathMissing, got: {e:?}"),
+        }
     }
 
     /// macOS, bundle_id set, NO profile: must use `open -b` (Gatekeeper-safe URL open).
@@ -385,5 +443,55 @@ mod tests {
         );
         let err = build_command(&ctx, &[]).unwrap_err();
         assert!(matches!(err, LaunchError::EmptyUrls));
+    }
+
+    /// Tokens with spaces must be double-quoted in dry-run / log output.
+    #[cfg(unix)]
+    #[test]
+    fn format_command_quotes_spaced_args() {
+        let ctx = chrome_ctx(
+            PathBuf::from("/bin/sh"),
+            Some(ProfileRef {
+                id: "Profile 1".into(),
+                display_name: "Work".into(),
+                path: None,
+            }),
+            LaunchCapability::full(),
+            None,
+        );
+        let cmd = build_command(&ctx, &[example_url()]).unwrap();
+        let line = format_command(&cmd);
+        // The profile arg contains a space and must be quoted.
+        assert!(
+            line.contains("\"--profile-directory=Profile 1\""),
+            "spaced profile arg must be double-quoted in dry-run output: {line}"
+        );
+        // The URL has no special chars and must not be needlessly quoted.
+        assert!(
+            line.contains("https://example.com"),
+            "plain URL should appear unquoted: {line}"
+        );
+    }
+
+    /// `shell_quote` on a token with no special chars returns it unchanged.
+    #[test]
+    fn shell_quote_plain_token_unchanged() {
+        assert_eq!(shell_quote("--profile-directory=Work"), "--profile-directory=Work");
+        assert_eq!(shell_quote("/usr/bin/firefox"), "/usr/bin/firefox");
+        assert_eq!(shell_quote("https://example.com"), "https://example.com");
+    }
+
+    /// `shell_quote` wraps spaced tokens in double quotes.
+    #[test]
+    fn shell_quote_spaces_are_quoted() {
+        assert_eq!(shell_quote("Profile 1"), "\"Profile 1\"");
+        assert_eq!(shell_quote("--profile-directory=Profile 1"), "\"--profile-directory=Profile 1\"");
+    }
+
+    /// `shell_quote` escapes interior double quotes and backslashes.
+    #[test]
+    fn shell_quote_escapes_special_chars() {
+        assert_eq!(shell_quote("say \"hi\""), r#""say \"hi\"""#);
+        assert_eq!(shell_quote(r"C:\path"), r#""C:\\path""#);
     }
 }

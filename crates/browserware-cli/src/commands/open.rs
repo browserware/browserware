@@ -98,6 +98,11 @@ fn map_launch_err(e: browserware_launch::LaunchError, ctx: &BrowserContext) -> a
         browserware_launch::LaunchError::ProcessFailed(status) => anyhow::anyhow!(
             "error: browser exited with status {status}\n  hint: run with `RUST_LOG=info` for details"
         ),
+        browserware_launch::LaunchError::FirefoxProfilePathMissing { profile_id } => {
+            anyhow::anyhow!(
+                "error: cannot launch Firefox profile\n  cause: profile '{profile_id}' has no resolved path in profiles.ini\n  hint: open Firefox once to populate the profile, then retry"
+            )
+        }
     }
 }
 
