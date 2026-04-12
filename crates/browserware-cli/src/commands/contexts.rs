@@ -23,7 +23,7 @@ pub(crate) fn run(format: OutputFormat) {
 }
 
 /// Discover all browser contexts by combining browser detection with profile discovery.
-fn discover_contexts() -> Vec<BrowserContext> {
+pub(crate) fn discover_contexts() -> Vec<BrowserContext> {
     let browsers = detect_browsers();
     let mut contexts = Vec::new();
 
@@ -151,12 +151,11 @@ pub(crate) fn format_plain(contexts: &[BrowserContext]) -> String {
     if contexts.is_empty() {
         return String::new();
     }
-    let mut out = contexts
-        .iter()
-        .map(BrowserContext::selector)
-        .collect::<Vec<_>>()
-        .join("\n");
-    out.push('\n');
+    let mut out = String::new();
+    for ctx in contexts {
+        let sel = ctx.selector();
+        let _ = writeln!(out, "brw open --context \"{sel}\" https://example.com");
+    }
     out
 }
 
@@ -218,6 +217,7 @@ mod tests {
             Some(ProfileRef {
                 id: profile_id.to_string(),
                 display_name: display_name.to_string(),
+                path: None,
             }),
             LaunchCapability::full(),
         )
@@ -243,6 +243,7 @@ mod tests {
             Some(ProfileRef {
                 id: "default-release".to_string(),
                 display_name: "default-release".to_string(),
+                path: None,
             }),
             LaunchCapability::full(),
         )
@@ -306,6 +307,11 @@ mod tests {
         let out = format_plain(&contexts);
         let lines: Vec<&str> = out.lines().collect();
         assert_eq!(lines.len(), 2, "expected 2 lines, got: {lines:?}");
+        assert!(
+            lines[0].starts_with("brw open --context \""),
+            "line 0 missing brw open hint: {}",
+            lines[0]
+        );
         assert!(
             lines[0].contains("family=chromium"),
             "line 0 missing 'family=chromium': {}",

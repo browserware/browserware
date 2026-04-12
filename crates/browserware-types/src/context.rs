@@ -4,6 +4,7 @@
 //! including profile information and capability flags for launching browsers.
 
 use std::fmt::Write as _;
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +17,9 @@ pub struct ProfileRef {
     pub id: String,
     /// Human-readable profile name (Chrome "Work", Firefox same as id).
     pub display_name: String,
+    /// Absolute profile directory on disk (Firefox `Path=`); Chrome uses [`Self::id`] only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<PathBuf>,
 }
 
 /// Capability flags for a browser context.
@@ -82,6 +86,7 @@ impl LaunchCapability {
 /// let profile = ProfileRef {
 ///     id: "Profile 1".to_string(),
 ///     display_name: "Work".to_string(),
+///     path: None,
 /// };
 /// let ctx = BrowserContext::new(browser, Some(profile), LaunchCapability::full());
 ///
@@ -220,10 +225,54 @@ mod tests {
         let profile = ProfileRef {
             id: "Profile 1".to_string(),
             display_name: "Work".to_string(),
+            path: None,
         };
         let json = serde_json::to_string(&profile)?;
         let parsed: ProfileRef = serde_json::from_str(&json)?;
         assert_eq!(profile, parsed);
+        Ok(())
+    }
+
+    #[test]
+    fn profile_ref_path_serde_none() -> Result<(), serde_json::Error> {
+        let profile = ProfileRef {
+            id: "p".to_string(),
+            display_name: "P".to_string(),
+            path: None,
+        };
+        let v = serde_json::to_value(&profile)?;
+        assert!(v.get("path").is_none(), "path should be omitted when None");
+        let parsed: ProfileRef = serde_json::from_value(v)?;
+        assert_eq!(parsed, profile);
+        Ok(())
+    }
+
+    #[test]
+    fn profile_ref_path_serde_some() -> Result<(), serde_json::Error> {
+        let profile = ProfileRef {
+            id: "p".to_string(),
+            display_name: "P".to_string(),
+            path: Some(PathBuf::from("/abs/path")),
+        };
+        let json = serde_json::to_string(&profile)?;
+        assert!(json.contains("path"));
+        let parsed: ProfileRef = serde_json::from_str(&json)?;
+        assert_eq!(parsed, profile);
+        Ok(())
+    }
+
+    #[test]
+    fn profile_ref_path_serde_omitted_key() -> Result<(), serde_json::Error> {
+        let json = r#"{"id":"p","display_name":"P"}"#;
+        let parsed: ProfileRef = serde_json::from_str(json)?;
+        assert_eq!(
+            parsed,
+            ProfileRef {
+                id: "p".to_string(),
+                display_name: "P".to_string(),
+                path: None,
+            }
+        );
         Ok(())
     }
 
@@ -268,6 +317,7 @@ mod tests {
         let profile = ProfileRef {
             id: "Profile 1".to_string(),
             display_name: "Work".to_string(),
+            path: None,
         };
         let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
         assert_eq!(
@@ -287,6 +337,7 @@ mod tests {
         let profile = ProfileRef {
             id: "work,alpha=1%".to_string(),
             display_name: "Work".to_string(),
+            path: None,
         };
         let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
         assert_eq!(
@@ -300,6 +351,7 @@ mod tests {
         let profile = ProfileRef {
             id: "Default".to_string(),
             display_name: "Default".to_string(),
+            path: None,
         };
         let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
         let json = serde_json::to_string(&ctx)?;
@@ -327,6 +379,7 @@ mod tests {
         let profile = ProfileRef {
             id: "Profile 1".to_string(),
             display_name: "Work".to_string(),
+            path: None,
         };
         let ctx = BrowserContext::new(chrome_browser(), Some(profile), LaunchCapability::full());
 

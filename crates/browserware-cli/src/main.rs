@@ -44,16 +44,16 @@ enum Commands {
         /// Browser ID or name
         browser: String,
     },
-    /// Open URL(s) with routing rules
+    /// Open URL(s) in a specific browser context
     Open {
+        /// Target context selector (`brw contexts` lists values; e.g. `chrome:work`)
+        #[arg(long)]
+        context: Option<String>,
+        /// Print the launch command without running it
+        #[arg(long)]
+        dry_run: bool,
         /// URLs to open
         urls: Vec<String>,
-        /// Override browser selection
-        #[arg(short, long)]
-        browser: Option<String>,
-        /// Override profile selection
-        #[arg(short, long)]
-        profile: Option<String>,
     },
     /// Manage configuration
     Config {
@@ -101,17 +101,10 @@ fn main() {
         }
         Commands::Open {
             urls,
-            browser,
-            profile,
+            context,
+            dry_run,
         } => {
-            println!("Opening URLs: {urls:?}");
-            if let Some(b) = browser {
-                println!("  Browser: {b}");
-            }
-            if let Some(p) = profile {
-                println!("  Profile: {p}");
-            }
-            println!("Full routing not yet implemented (Milestone 4)");
+            commands::open::run(cli.format, context.as_deref(), &urls, dry_run);
         }
         Commands::Config { action } => match action {
             ConfigAction::Show => println!("Config show not yet implemented"),

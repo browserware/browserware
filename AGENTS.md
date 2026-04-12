@@ -31,7 +31,7 @@ with a premium closed-source GUI application.
 **Open Source (MIT OR Apache-2.0)**:
 - All library crates (`browserware-*`)
 - CLI (`browserware-cli` / `brw`)
-- Published to crates.io
+- Not yet published to crates.io (install from Git; see README)
 - Community contributions welcome
 
 **Closed Source (Proprietary)**:
@@ -117,13 +117,13 @@ a fundamental platform limitation.
 
 | Crate | Single Question | Published |
 |-------|-----------------|-----------|
-| `browserware-types` | Shared types and browser-context selectors | crates.io ✅ |
-| `browserware-detect` | "What browsers exist?" | crates.io ✅ |
-| `browserware-profiles` | "What profiles and contexts exist?" | crates.io ✅ |
-| `browserware-launch` | "Run this browser" | crates.io ✅ |
-| `browserware-rules` | "Which browser for URL?" | crates.io ✅ |
-| `browserware-system` | "OS integration" | crates.io ✅ |
-| `browserware-cli` | User CLI (`brw` binary) | crates.io ✅ |
+| `browserware-types` | Shared types and browser-context selectors | not yet |
+| `browserware-detect` | "What browsers exist?" | not yet |
+| `browserware-profiles` | "What profiles and contexts exist?" | not yet |
+| `browserware-launch` | "Run this browser" | not yet |
+| `browserware-rules` | "Which browser for URL?" | not yet |
+| `browserware-system` | "OS integration" | not yet |
+| `browserware-cli` | User CLI (`brw` binary) | not yet |
 | `browserware-gui` | Desktop app | Private ❌ |
 
 ### Data Flow for `brw open https://example.com`

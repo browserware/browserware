@@ -65,7 +65,7 @@ pub struct ContextSelector {
     pub family: Option<String>,
     /// Filter by browser ID (e.g. `"chrome"`, `"firefox"`, `"safari"`).
     pub browser: Option<String>,
-    /// Filter by profile ID (e.g. `"Profile 1"`, `"work"`).
+    /// Filter by profile ID or display name (e.g. `"Profile 1"`, `"Work"`, `"work"`). Matching is case-insensitive.
     pub profile: Option<String>,
 }
 
@@ -182,7 +182,9 @@ impl ContextSelector {
         if let Some(profile) = &self.profile {
             match ctx.profile.as_ref() {
                 Some(p) => {
-                    if *profile != p.id {
+                    if !profile.eq_ignore_ascii_case(&p.id)
+                        && !profile.eq_ignore_ascii_case(&p.display_name)
+                    {
                         return false;
                     }
                 }
@@ -309,6 +311,7 @@ mod tests {
             Some(ProfileRef {
                 id: profile_id.to_string(),
                 display_name: profile_name.to_string(),
+                path: None,
             }),
             LaunchCapability::full(),
         )
@@ -449,6 +452,41 @@ mod tests {
     fn matches_family_only() {
         let ctx = chrome_ctx("Profile 1", "Work");
         let sel = ContextSelector::parse("family=chromium").unwrap();
+        assert!(sel.matches(&ctx));
+    }
+
+    #[test]
+    fn matches_profile_by_display_name() {
+        // User sees "Work" in `brw contexts` and types `--context chrome:Work`.
+        // The internal id is "Profile 1" — matching must succeed via display_name.
+        let ctx = chrome_ctx("Profile 1", "Work");
+        let sel = ContextSelector::parse("chrome:Work").unwrap();
+        assert!(sel.matches(&ctx));
+    }
+
+    #[test]
+    fn matches_profile_by_id_still_works() {
+        // Canonical id-based selectors (e.g. copied from `brw contexts --format json`)
+        // must continue to work.
+        let ctx = chrome_ctx("Profile 1", "Work");
+        let sel = ContextSelector::parse("browser=chrome,profile=Profile 1").unwrap();
+        assert!(sel.matches(&ctx));
+    }
+
+    #[test]
+    fn matches_profile_case_insensitive_display_name() {
+        // Users typing in a terminal may not match case exactly.
+        // `chrome:work` must match a profile with display_name="Work".
+        let ctx = chrome_ctx("Profile 1", "Work");
+        let sel = ContextSelector::parse("chrome:work").unwrap();
+        assert!(sel.matches(&ctx));
+    }
+
+    #[test]
+    fn matches_profile_case_insensitive_id() {
+        // id-based matching is also case-insensitive for consistency.
+        let ctx = chrome_ctx("Profile 1", "Work");
+        let sel = ContextSelector::parse("browser=chrome,profile=profile 1").unwrap();
         assert!(sel.matches(&ctx));
     }
 

@@ -21,18 +21,27 @@ mise exec cargo:just@1.49.0 -- just validate
 
 Use the `just ci-*` recipes or `mise exec ...` when running checks locally so your machine exercises the same Rust and cargo-tool versions expected in CI.
 
-## Usage
+## Getting started
 
 ```bash
 # List detected browsers
 brw browsers
 
-# List launchable browser contexts
+# List launchable browser contexts (copy a selector from plain output)
 brw contexts
 
-# Open URL with routing
-brw open https://github.com
+# Open a URL in a specific context (copy a selector from `brw contexts`)
+brw open --context chrome:Default https://example.com
+
+# Print the launch command without running the browser
+brw open --dry-run --context chrome:Default https://example.com
 ```
+
+`brw open` without `--context` exits with an error and a hint. That avoids accidental loops through the default browser until config-driven routing is wired up.
+
+## Usage
+
+Same commands as in **Getting started**; use `brw --help` and `brw open --help` for flags.
 
 ## Crates
 

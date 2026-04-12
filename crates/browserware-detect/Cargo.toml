@@ -23,7 +23,7 @@ windows-registry = "0.6"
 [target.'cfg(target_os = "linux")'.dependencies]
 xdg = "3"
 home = "0.5"
-which = "7"
+which = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }
