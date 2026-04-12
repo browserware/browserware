@@ -69,6 +69,7 @@ pub fn discover_chrome_profiles_from(data_dir: &std::path::Path) -> ProfileDisco
         .map(|(dir_name, meta)| ProfileRef {
             id: dir_name.clone(),
             display_name: meta["name"].as_str().unwrap_or(dir_name).to_string(),
+            path: None,
         })
         .collect();
 

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-12
+
+### Added
+
+- **`brw open`**: launch URLs in an explicit browser context via `--context` (same selectors as `brw contexts`); `--dry-run` prints the command without executing.
+- **`ProfileRef.path`**: optional resolved profile directory on disk for launchers that need an absolute path (e.g. Firefox).
+- **Firefox profiles**: `profiles.ini` parsing now reads `Path=` and `IsRelative=` so profile paths resolve correctly.
+- **`browserware-launch`**: `build_command`, `format_command`, and `launch` with structured `LaunchError` (Chromium `--profile-directory=<id>`, Firefox `--profile <abs_path> --no-remote`). On macOS with a bundle ID: URL-only opens use `open -b <bundle_id>` (Gatekeeper-safe); profile-targeted opens use the direct executable because `open -b --args` silently drops flags when the app is already running.
+
+### Changed
+
+- **`brw open`**: removed stub `--browser` / `--profile` flags; opening without `--context` is an error with guidance (avoids default-browser routing until rules land).
+
 ## [0.2.0] - 2026-04-11
 
 ### Added
@@ -71,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workspace-level lints (clippy pedantic + nursery)
 - cargo-deny for dependency security and license compliance
 
-[Unreleased]: https://github.com/browserware/browserware/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/browserware/browserware/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/browserware/browserware/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/browserware/browserware/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/browserware/browserware/releases/tag/v0.1.0

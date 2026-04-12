@@ -160,11 +160,13 @@ fn browsers_short_family_flag() {
 }
 
 #[test]
-fn open_subcommand_exists() {
+fn open_without_context_fails_with_hint() {
     brw()
         .args(["open", "https://example.com"])
         .assert()
-        .success();
+        .failure()
+        .stderr(predicate::str::contains("no context specified"))
+        .stderr(predicate::str::contains("--context"));
 }
 
 // ─── brw contexts ────────────────────────────────────────────────────────────
@@ -265,6 +267,10 @@ fn contexts_plain_format_selectors_are_stable() {
         if line.is_empty() {
             continue;
         }
+        assert!(
+            line.starts_with("brw open --context \""),
+            "plain output line missing copy-paste hint: {line:?}"
+        );
         assert!(
             line.contains("family=") && line.contains("browser="),
             "plain output line is not a canonical selector: {line:?}"
